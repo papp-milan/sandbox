@@ -16,7 +16,7 @@ const ideas = [
 export default function App() {
   return <div className="app-shell">
     <aside className="sidebar">
-      <a className="brand" href="/"><span className="brand-mark"></span><span className="brand-name">SANDBOX</span></a>
+      <a className="brand" href="https://sandbox.pappmilan.com"><span className="brand-mark"></span><span className="brand-name">SANDBOX</span></a>
       <div className="sidebar-section"><p className="eyebrow">WORKSPACE</p><a className="nav-item active" href="#overview"><Grid2X2 size={16}/> Overview</a><a className="nav-item" href="#roadmap"><GitBranch size={16}/> Roadmap</a></div>
       <div className="sidebar-section"><p className="eyebrow">LABS</p><a className="nav-item" href="#visual-lab"><Orbit size={16}/> Visual Lab</a><a className="nav-item muted" href="#data-lab"><Grid2X2 size={16}/> Data Lab </a><a className="nav-item muted" href="#event-lab"><Waves size={16}/> Event Lab </a><a className="nav-item muted" href="#ai-lab"><FlaskConical size={16}/> AI Lab </a></div>
     </aside>
