@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { compileSurfaceExpression, sampleSurface } from "./graph-utils";
 
@@ -21,21 +21,15 @@ export function GraphSurface({ expression, amplitude, frequency, mode }: GraphSu
     return result;
   }, [expression, amplitude, frequency]);
 
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
   const solid = mode !== "wireframe";
   const wire = mode !== "solid";
 
   return (
     <group>
-      {solid && (
-        <mesh geometry={geometry}>
-          <meshStandardMaterial vertexColors roughness={0.72} metalness={0.08} side={THREE.DoubleSide} />
-        </mesh>
-      )}
-      {wire && (
-        <mesh geometry={geometry}>
-          <meshBasicMaterial color="#c9d1d9" wireframe transparent opacity={mode === "combined" ? 0.2 : 0.72} />
-        </mesh>
-      )}
+      {solid && <mesh geometry={geometry}><meshStandardMaterial vertexColors roughness={0.72} metalness={0.08} side={THREE.DoubleSide} /></mesh>}
+      {wire && <mesh geometry={geometry}><meshBasicMaterial color="#c9d1d9" wireframe transparent opacity={mode === "combined" ? 0.2 : 0.72} /></mesh>}
     </group>
   );
 }
