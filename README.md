@@ -9,6 +9,7 @@ A personal technical playground for experiments, visualizations and things worth
 - 3D: Three.js, React Three Fiber, Drei
 - API: Java 21, Spring Boot
 - Persistence: PostgreSQL later, when needed
+- Package management: npm workspaces
 
 ## Structure
 - `apps/web` — frontend
@@ -16,8 +17,23 @@ A personal technical playground for experiments, visualizations and things worth
 - `docs` — architecture and roadmap
 
 ## Run locally
-Frontend: `cd apps/web && pnpm install && pnpm dev`
-Backend (Maven installed): `cd apps/api && mvn spring-boot:run`
+Install frontend dependencies from the repository root:
+
+```bash
+npm install
+npm run dev
+```
+
+Useful root scripts:
+- `npm run build` — build the frontend
+- `npm run typecheck` — type-check the frontend
+- `npm run preview` — preview the production build
+
+Run the backend (Maven installed):
+
+```bash
+cd apps/api && mvn spring-boot:run
+```
 
 API health check: `GET http://localhost:8080/api/health`
 
