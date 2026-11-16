@@ -17,7 +17,7 @@ A personal technical playground for experiments, visualizations and things worth
 
 ## Run locally
 Frontend: `cd apps/web && pnpm install && pnpm dev`
-Backend: `cd apps/api && ./mvnw spring-boot:run`
+Backend (Maven installed): `cd apps/api && mvn spring-boot:run`
 
 API health check: `GET http://localhost:8080/api/health`
 
