@@ -490,3 +490,80 @@ a {
         font-size: 7px
     }
 }
+
+
+/* Visual Lab */
+.visual-lab { min-height: 100vh; padding: 0 54px; max-width: 1800px; margin: 0 auto; }
+.visual-topbar { height: 66px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.back-link { display: inline-flex; align-items: center; gap: 9px; padding: 8px 0; color: #999; background: none; border: 0; cursor: pointer; font-size: 12px; }
+.back-link:hover { color: #fff; }
+.visual-top-meta { display: flex; align-items: center; gap: 11px; color: #777; font: 9px var(--mono); letter-spacing: .08em; }
+.visual-top-meta span { color: #ddd; }
+.visual-top-meta i { width: 3px; height: 3px; border-radius: 50%; background: #666; }
+.visual-heading { display: flex; align-items: end; justify-content: space-between; padding: 48px 0 30px; }
+.visual-eyebrow { color: #777; font: 9px var(--mono); letter-spacing: .12em; margin: 0 0 14px; }
+.visual-heading h1 { margin: 0; font-size: clamp(36px, 5vw, 62px); line-height: 1; font-weight: 500; letter-spacing: -.065em; }
+.visual-heading h1 span { color: #666; }
+.visual-subtitle { margin: 14px 0 0; color: #888; font-size: 13px; }
+.visual-coordinate { display: flex; align-items: center; gap: 9px; color: #777; font: 9px var(--mono); letter-spacing: .08em; padding-bottom: 5px; }
+.visual-workspace { display: grid; grid-template-columns: 286px minmax(0, 1fr); border: 1px solid var(--line); min-height: 620px; }
+.visual-controls { display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+.control-section { padding: 20px 19px; border-bottom: 1px solid var(--line); }
+.control-label { display: flex; align-items: center; justify-content: space-between; color: #aaa; font: 9px var(--mono); letter-spacing: .1em; margin-bottom: 16px; }
+.control-state { color: #aaa; }
+.control-muted { color: #666; }
+.function-form label { display: block; color: #777; font: 10px var(--mono); margin-bottom: 7px; }
+.function-form textarea { display: block; width: 100%; min-height: 72px; resize: vertical; border: 1px solid #333; border-radius: 2px; padding: 10px; outline: none; color: #ddd; background: #101113; font: 11px/1.6 var(--mono); }
+.function-form textarea:focus { border-color: #777; }
+.apply-button { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 10px 11px; border: 1px solid #555; background: #e7e7e7; color: #111; font-size: 11px; cursor: pointer; }
+.apply-button:hover { background: #fff; }
+.function-error { color: #e28d8d; font-size: 10px; line-height: 1.4; margin: 8px 0 0; }
+.function-hint { color: #666; font-size: 10px; line-height: 1.55; margin: 11px 0 0; }
+.preset-list { display: grid; gap: 4px; }
+.preset-button { display: flex; flex-direction: column; gap: 4px; padding: 9px 10px; text-align: left; color: #aaa; border: 1px solid transparent; background: transparent; cursor: pointer; }
+.preset-button span { font-size: 11px; }
+.preset-button small { color: #666; font-size: 9px; }
+.preset-button:hover { background: #111; }
+.preset-button.active { border-color: #383838; background: #131416; color: #fff; }
+.range-control { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin: 14px 0; color: #aaa; font-size: 11px; }
+.range-control output { color: #ddd; font: 10px var(--mono); }
+.range-control input { grid-column: 1 / -1; width: 100%; accent-color: #ddd; cursor: pointer; }
+.reset-button { display: inline-flex; align-items: center; gap: 8px; margin: auto 19px 18px; padding: 8px 0; color: #777; border: 0; background: transparent; cursor: pointer; font-size: 10px; }
+.reset-button:hover { color: #ddd; }
+.visual-stage { min-width: 0; display: flex; flex-direction: column; }
+.stage-toolbar, .stage-footer { display: flex; align-items: center; justify-content: space-between; min-height: 43px; padding: 0 16px; border-bottom: 1px solid var(--line); color: #888; font: 9px var(--mono); letter-spacing: .04em; }
+.stage-toolbar > div:first-child { display: flex; align-items: center; gap: 8px; }
+.stage-dot { width: 5px; height: 5px; border-radius: 50%; background: #aaa; }
+.render-modes { display: flex; gap: 3px; }
+.render-modes button { padding: 6px 8px; border: 1px solid transparent; color: #666; background: transparent; font: 9px var(--mono); text-transform: uppercase; cursor: pointer; }
+.render-modes button.selected { color: #eee; border-color: #393939; background: #171819; }
+.graph-canvas { position: relative; flex: 1; min-height: 530px; }
+.graph-canvas canvas { display: block; }
+.canvas-hint { position: absolute; left: 17px; bottom: 14px; display: flex; align-items: center; gap: 7px; color: #666; font: 8px var(--mono); letter-spacing: .07em; pointer-events: none; }
+.stage-footer { min-height: 38px; border-top: 1px solid var(--line); border-bottom: 0; color: #626262; font-size: 8px; }
+.visual-footer { display: flex; justify-content: space-between; padding: 22px 0; color: #555; font: 8px var(--mono); letter-spacing: .08em; }
+.lab-card[aria-disabled="true"] { cursor: default; }
+@media (max-width: 900px) {
+  .visual-lab { padding-inline: 28px; }
+  .visual-workspace { grid-template-columns: 250px minmax(0, 1fr); }
+  .stage-footer { gap: 8px; }
+}
+@media (max-width: 700px) {
+  .visual-lab { padding: 0 16px; }
+  .visual-topbar { height: 54px; }
+  .visual-top-meta { font-size: 8px; }
+  .visual-heading { padding: 35px 0 24px; }
+  .visual-heading h1 { font-size: clamp(34px, 9vw, 48px); }
+  .visual-coordinate { display: none; }
+  .visual-workspace { display: flex; flex-direction: column; }
+  .visual-controls { border-right: 0; border-bottom: 1px solid var(--line); }
+  .control-section { padding: 16px; }
+  .preset-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .preset-button { padding: 8px; }
+  .reset-button { margin: 12px 16px; }
+  .graph-canvas { min-height: 390px; }
+  .stage-toolbar { padding: 0 9px; }
+  .render-modes button { padding: 6px 5px; font-size: 8px; }
+  .stage-footer { flex-wrap: wrap; padding: 10px; font-size: 7px; }
+  .visual-footer { font-size: 7px; }
+}
