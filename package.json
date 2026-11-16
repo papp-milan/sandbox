@@ -1,0 +1,14 @@
+{
+  "name": "sandbox",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @sandbox/web",
+    "build": "npm run build --workspace @sandbox/web",
+    "typecheck": "npm run typecheck --workspace @sandbox/web",
+    "preview": "npm run preview --workspace @sandbox/web"
+  }
+}
