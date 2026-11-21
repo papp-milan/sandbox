@@ -1035,3 +1035,6 @@ a {
 .radar-overlay { position:absolute; left:0; top:0; max-width:none; pointer-events:none; }
 .radar-tile-plane { position:absolute; inset:0; }
 @media(max-width:700px) { .scene-test-panel { padding:14px; } .scene-test-heading { align-items:flex-start; flex-direction:column; } .scene-test-controls { align-items:stretch; flex-direction:column; } .scene-test-controls label,.scene-test-controls select { width:100%; } .scene-test-note { margin-left:0; } }
+
+.radar-overlay-crop { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.radar-overlay { position:absolute; max-width:none; display:block; pointer-events:none; }
