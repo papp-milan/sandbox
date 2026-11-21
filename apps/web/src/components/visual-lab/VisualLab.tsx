@@ -23,7 +23,7 @@ export function VisualLab({ onBack }: { onBack: () => void }) {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"graph" | "weather">("graph");
 
-  if (activeTab === "weather") return <WeatherLab onBack={() => setActiveTab("graph")} />;
+
 
   const activePreset = presets.find((preset) => preset.expression === expression)?.name ?? "Custom function";
   const formulaValid = useMemo(() => {
