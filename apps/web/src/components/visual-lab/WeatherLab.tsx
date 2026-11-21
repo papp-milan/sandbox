@@ -106,7 +106,7 @@ export function WeatherLab({onBack,onGraphClick}:{onBack:()=>void;onGraphClick:(
    <div className="weather-filters" role="group" aria-label="Highlight days by weather">
     {([{id:"all",label:"All"},{id:"sun",label:"☀ Sun"},{id:"clouds",label:"☁ Clouds"},{id:"rain",label:"☂ Rain"},{id:"snow",label:"❄ Snow"},{id:"storm",label:"ϟ Storm"}] as {id:WeatherFilter;label:string}[]).map(filter=><button type="button" key={filter.id} aria-pressed={weatherFilter===filter.id} className={weatherFilter===filter.id?"active":""} onClick={()=>setWeatherFilter(filter.id)}>{filter.label}</button>)}
    </div>
-   <div className="week-strip">{daily.map((d,i)=>{const match=matchesFilter(d.code);return <div className={"day-card "+(match?"filter-match":"filter-muted")} key={d.sunrise} title={weatherLabel(d.code)}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong><em>{weatherLabel(d.code)}</em></div>;})}</div></div></section>
+   <div className="week-strip">{daily.map((d,i)=>{const match=matchesFilter(d.code);return <div className={"day-card "+(match?"filter-match":"filter-muted")} key={d.sunrise} title={weatherLabel(d.code)}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong><em>{weatherLabel(d.code)}</em></div>;})}</div></section>
   {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
   <p className="weather-attribution">WEATHER DATA BY OPEN-METEO · {locationNote.toUpperCase()} · UPDATES ON REFRESH</p>
  </main>;
