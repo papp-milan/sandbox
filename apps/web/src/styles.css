@@ -1192,3 +1192,44 @@ a {
 }
 
 .legend-ship { background:#819598; box-shadow:inset 0 0 0 2px #46575a; }.legend-sunk { background:#713e43; box-shadow:0 0 7px rgba(193,122,122,.65); }
+
+
+/* Battleships — hull silhouettes and live placement ghost */
+.own-fleet-grid { position:relative; }
+.own-fleet-grid button { position:relative; isolation:isolate; overflow:visible; }
+.own-fleet-grid button.ship-cell,
+.own-fleet-grid button.ship-preview { background:transparent; box-shadow:none; z-index:1; }
+.own-fleet-grid button.ship-cell::before,
+.own-fleet-grid button.ship-preview::before {
+  content:""; position:absolute; inset:3px; z-index:-1;
+  background:linear-gradient(155deg,#9aaeb0 0%,#647b7e 45%,#35494d 100%);
+  border:1px solid #c0d0d0;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.32),inset 0 -3px 5px rgba(0,0,0,.36),0 1px 3px rgba(0,0,0,.45);
+}
+.own-fleet-grid button.ship-cell::after,
+.own-fleet-grid button.ship-preview::after {
+  content:""; position:absolute; inset:7px 5px; z-index:-1;
+  border:1px solid rgba(224,238,238,.35); pointer-events:none;
+}
+.own-fleet-grid button.ship-horizontal.ship-bow::before,
+.own-fleet-grid button.ship-preview.ship-horizontal.ship-bow::before { border-radius:75% 3px 3px 75%; }
+.own-fleet-grid button.ship-horizontal.ship-stern::before,
+.own-fleet-grid button.ship-preview.ship-horizontal.ship-stern::before { border-radius:3px 75% 75% 3px; }
+.own-fleet-grid button.ship-horizontal.ship-mid::before { border-radius:2px; }
+.own-fleet-grid button.ship-vertical.ship-bow::before { border-radius:75% 75% 3px 3px; }
+.own-fleet-grid button.ship-vertical.ship-stern::before { border-radius:3px 3px 75% 75%; }
+.own-fleet-grid button.ship-vertical.ship-mid::before { border-radius:2px; }
+.own-fleet-grid button.ship-horizontal::after { inset:8px 5px; border-left:0; border-right:0; }
+.own-fleet-grid button.ship-vertical::after { inset:5px 8px; border-top:0; border-bottom:0; }
+.own-fleet-grid button.ship-preview { z-index:2; pointer-events:auto; }
+.own-fleet-grid button.ship-preview::before {
+  background:linear-gradient(155deg,rgba(173,204,207,.75),rgba(79,119,124,.72));
+  border:1px dashed #e2f0f0;
+  box-shadow:0 0 13px rgba(148,197,202,.35),inset 0 0 10px rgba(213,239,241,.2);
+}
+.own-fleet-grid button.ship-preview::after { border-color:rgba(230,248,249,.62); }
+.own-fleet-grid button.ship-cell.sunk::before { background:linear-gradient(145deg,#9b6268,#512d32); border-color:#d59a9e; }
+.own-fleet-grid button.ship-cell.hit::before { background:linear-gradient(145deg,#c47e7e,#743d42); border-color:#f0b2b2; }
+.own-fleet-grid button.ship-cell.hit::after { border-color:rgba(255,225,225,.5); }
+.own-fleet-grid button.ship-preview.placeable:hover { background:transparent; }
+.own-fleet-grid button.ship-cell { color:#f4f7f7; text-shadow:0 1px 3px #142023; }
