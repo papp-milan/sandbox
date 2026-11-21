@@ -42,8 +42,9 @@ function Mountain({position,scale,season}:{position:[number,number,number];scale
 }
 function Cloud({position,scale=1,storm=false}:{position:[number,number,number];scale?:number;storm?:boolean}){
  const ref=useRef<THREE.Group>(null);
- useFrame(({clock})=>{if(ref.current){ref.current.position.x=position[0]+Math.sin(clock.elapsedTime*.12+position[2])*.65;ref.current.position.y=position[1]+Math.sin(clock.elapsedTime*.3+position[0])*.12;}});
- return <group ref={ref} position={position} scale={scale}>{[[-.8,0,0],[0,.28,0],[.78,.02,0],[-.25,-.28,.12],[.55,-.3,.1]].map(([x,y,z],i)=><mesh key={i} position={[x,y,z]}><sphereGeometry args={[.68,20,16]}/><meshStandardMaterial color={storm?"#536272":"#edf3f2"} roughness={1}/></mesh>)}</group>;
+ useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime;ref.current.position.x=position[0]+Math.sin(t*.075+position[2])*.9;ref.current.position.y=position[1]+Math.sin(t*.22+position[0])*.1;ref.current.rotation.z=Math.sin(t*.08+position[2])*.018;ref.current.scale.setScalar(scale*(1+Math.sin(t*.18+position[0])*.018));}});
+ const puffs=[[-1.05,-.08,0,.78],[ -.45,.28,0,.9],[.25,.42,0,1.02],[.95,.12,0,.82],[-.45,-.32,.08,.72],[.48,-.28,.08,.76]];
+ return <group ref={ref} position={position} scale={scale}>{puffs.map(([x,y,z,r],i)=><mesh key={i} position={[x,y,z]}><sphereGeometry args={[r,24,18]}/><meshStandardMaterial color={storm?"#435267":"#f4f7f5"} roughness={1} transparent opacity={storm?.96:.94}/></mesh>)}</group>;
 }
 function Cabin({season}:{season:Season}){
  return <group position={[2.3,-1.85,-2.2]} scale={.72}>
@@ -59,21 +60,23 @@ function Cabin({season}:{season:Season}){
   <mesh position={[-.42,.56,.69]}><boxGeometry args={[.025,.34,.02]}/><meshStandardMaterial color="#4a3c34"/></mesh>
  </group>;
 }
-function WeatherParticles({weather,season}:{weather:HourlyWeather;season:Season}){
+function WeatherParticles({weather}:{weather:HourlyWeather}){
  const ref=useRef<THREE.Points>(null);
- const kind=weatherKind(weather.code),isSnow=kind==="snow",isRain=kind==="rain"||kind==="storm",seasonal= !isSnow&&!isRain&&kind!=="fog"&&season!=="winter",count=isRain?(kind==="storm"?1450:900):isSnow?520:seasonal?(season==="spring"?150:season==="autumn"?125:75):0;
+ const kind=weatherKind(weather.code),isSnow=kind==="snow",isRain=kind==="rain"||kind==="storm";
+ // Seasonal ambience is deliberately not rendered as falling white particles:
+ // clear/sunny weather must never resemble snowfall.
+ const count=isRain?(kind==="storm"?1550:950):isSnow?620:0;
  const positions=useMemo(()=>{const a=new Float32Array(count*3);for(let i=0;i<count;i++){a[i*3]=(Math.random()-.5)*24;a[i*3+1]=Math.random()*12-3;a[i*3+2]=(Math.random()-.5)*14;}return a;},[count]);
- useFrame((_,delta)=>{if(!ref.current)return;const p=ref.current.geometry.attributes.position;for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);if(isRain){y-=delta*16;x+=delta*(weather.wind/38+.3);}else if(isSnow){y-=delta*(.55+weather.wind/110);x+=delta*(Math.sin(y*1.7+i)*.28+weather.wind/130);z+=Math.sin(y+i)*delta*.12;}else{y-=delta*(season==="summer"?.18:season==="spring"?.42:.72);x+=delta*(Math.sin(y*1.7+i)*.28+weather.wind/150);z+=Math.sin(y+i)*delta*.1;}if(y< -2.5){y=8+Math.random()*3;x=(Math.random()-.5)*24;z=(Math.random()-.5)*14;}p.setXYZ(i,x,y,z);}p.needsUpdate=true;});
- const color=isRain?"#ccecff":isSnow?"#f6fcff":season==="spring"?"#ffd1e2":season==="autumn"?"#d98239":"#f6df9c";
- return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions,3]}/></bufferGeometry><pointsMaterial color={color} size={isRain?.038:isSnow?.085:season==="summer"?.045:.11} transparent opacity={isRain?.78:isSnow?.94:season==="summer"?.55:.86} sizeAttenuation/></points>;
+ useFrame((_,delta)=>{if(!ref.current)return;const p=ref.current.geometry.attributes.position;for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);if(isRain){y-=delta*17;x+=delta*(weather.wind/38+.3);}else{y-=delta*(.62+weather.wind/110);x+=delta*(Math.sin(y*1.7+i)*.34+weather.wind/130);z+=Math.sin(y+i)*delta*.14;}if(y< -2.5){y=8+Math.random()*3;x=(Math.random()-.5)*24;z=(Math.random()-.5)*14;}p.setXYZ(i,x,y,z);}p.needsUpdate=true;});
+ return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions,3]}/></bufferGeometry><pointsMaterial color={isRain?"#ccecff":"#f6fcff"} size={isRain?.038:.085} transparent opacity={isRain?.78:.94} sizeAttenuation/></points>;
 }
 
 function FogBanks(){
  const ref=useRef<THREE.Group>(null);
- useFrame(({clock})=>{if(ref.current){ref.current.position.x=Math.sin(clock.elapsedTime*.035)*.65;ref.current.children.forEach((child,i)=>{child.position.z=-5+i*1.5;});}});
+ useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime;ref.current.position.x=Math.sin(t*.025)*1.1;ref.current.children.forEach((child,i)=>{child.position.x=Math.sin(t*.045+i*1.7)*.45;child.position.y=Math.sin(t*.16+i)*.06;});}});
  return <group ref={ref}>
-  {[-1.9,-.95,-.15].map((y,i)=><group key={i} position={[0,y,-5+i*1.5]}>
-   {[-8,-5,-2,1,4,7].map((x,j)=><mesh key={j} position={[x+(i%2)*1.3,Math.sin(j*1.7+i)*.22,0]} scale={[2.8+i*.25,.42+i*.12,.65]}><sphereGeometry args={[1,20,12]}/><meshBasicMaterial color={i===2?"#e8f0f1":"#f4f7f6"} transparent opacity={.12+i*.025} depthWrite={false}/></mesh>)}
+  {[-1.78,-1.42,-1.08].map((y,i)=><group key={i} position={[0,y,-1.5+i*1.2]}>
+   {[-8,-5,-2,1,4,7].map((x,j)=><mesh key={j} position={[x+(i%2)*1.1,Math.sin(j*1.7+i)*.09,0]} scale={[3.3+i*.35,.13+i*.035,.42]}><sphereGeometry args={[1,24,12]}/><meshBasicMaterial color={i===2?"#dce8eb":"#edf3f4"} transparent opacity={.075+i*.012} depthWrite={false}/></mesh>)}
   </group>)}
  </group>;
 }
@@ -119,7 +122,7 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   const bg=state.scene.background as THREE.Color|null;if(bg)bg.lerp(targetSky,1-Math.exp(-delta*.8));
   if(state.scene.fog instanceof THREE.Fog)state.scene.fog.color.lerp(targetSky,1-Math.exp(-delta*.8));
   if(ground.current){const m=ground.current.material as THREE.MeshStandardMaterial;m.color.lerp(targetGround,1-Math.exp(-delta*1.1));}
-  if(water.current){water.current.rotation.z=Math.sin(state.clock.elapsedTime*.2)*.004;const m=water.current.material as THREE.MeshStandardMaterial;m.color.lerp(new THREE.Color(theme.water),1-Math.exp(-delta));}
+  if(water.current){const geometry=water.current.geometry as THREE.BufferGeometry;const position=geometry.attributes.position as THREE.BufferAttribute;const base=(water.current.userData.basePositions??=Float32Array.from(position.array as ArrayLike<number>)) as Float32Array;const t=state.clock.elapsedTime;for(let i=0;i<position.count;i++){const x=base[i*3],y=base[i*3+1];position.setZ(i,base[i*3+2]+Math.sin(x*2.1+t*1.7)*.025+Math.cos(y*3.2-t*1.25)*.018);}position.needsUpdate=true;geometry.computeVertexNormals();const m=water.current.material as THREE.MeshStandardMaterial;m.color.lerp(new THREE.Color(theme.water),1-Math.exp(-delta));}
   if(sun.current){const a=(hour-6)/12*Math.PI;sun.current.position.set(-5+Math.cos(a)*5,Math.max(-.1,Math.sin(a))*5,-3);sun.current.visible=!night;}
   if(flash.current){const pulse=storm&&Math.random()>.992?5.5:0;flash.current.intensity=THREE.MathUtils.damp(flash.current.intensity,pulse,5,delta);}
   if(clouds.current)clouds.current.position.x=Math.sin(state.clock.elapsedTime*.08)*.5;
@@ -134,7 +137,7 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   {foggy&&<FogBanks/>}
   {cloudy&&<group ref={clouds}><Cloud position={[-4,3,-3]} scale={storm?1.6:1.2} storm={storm}/><Cloud position={[1.5,3.7,-4]} scale={storm?1.8:1.1} storm={storm}/><Cloud position={[6,2.9,-3]} scale={.9} storm={storm}/></group>}
   <mesh ref={ground} rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={1}/></mesh>
-  <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,64]}/><meshStandardMaterial color={theme.water} roughness={.16} metalness={.18} transparent opacity={.94}/></mesh>
+  <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,96,48]}/><meshStandardMaterial color={theme.water} roughness={.12} metalness={.22} transparent opacity={.94}/></mesh>
   <TerrainDetails season={season}/>
   <WorldLandmarks season={season}/>
   {treePositions.map(([x,y,z,s],i)=><SeasonalTree key={i} position={[x,y,z]} scale={s} season={season}/>)}
@@ -142,7 +145,7 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   {season==="spring"&&<group>{[-5,-3.5,4,5.5].map((x,i)=><mesh key={i} position={[x,-1.95,1.2]} rotation={[0,0,Math.sin(i)*.12]}><sphereGeometry args={[.12,10,8]}/><meshStandardMaterial color="#f3b8ce"/></mesh>)}</group>}
   {season==="winter"&&<mesh position={[0,-1.94,0]} scale={[9,.08,4]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#f2f8fb" roughness={1}/></mesh>}
   {season==="autumn"&&<mesh position={[0,-1.92,1]} scale={[8,.035,3]}><sphereGeometry args={[1,24,16]}/><meshStandardMaterial color="#9b633d" roughness={1}/></mesh>}
-  <WeatherParticles weather={weather} season={season}/>
+  <WeatherParticles weather={weather}/>
   {storm&&<pointLight ref={flash} position={[1,4,1]} intensity={0} distance={22} color="#dceaff"/>}
  </>;
 }
