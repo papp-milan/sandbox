@@ -17,7 +17,7 @@ async function loadWeather(latitude:number,longitude:number,signal:AbortSignal):
  const currentTime=String(raw.current.time);
  const times=raw.hourly.time as string[];
  const hourly=times.map((_:string,i:number)=>mapHour(raw.hourly,i));
- const currentIndex=Math.max(0,hourly.findIndex(h=>h.time===currentTime));
+ const currentIndex=Math.max(0,hourly.findIndex((h,i)=>h.time>currentTime && i>0)-1);
  const current={...hourly[currentIndex],temperature:Number(raw.current.temperature_2m),apparent:Number(raw.current.apparent_temperature),humidity:Number(raw.current.relative_humidity_2m),precipitation:Number(raw.current.precipitation),wind:Number(raw.current.wind_speed_10m),windDirection:Number(raw.current.wind_direction_10m),pressure:Number(raw.current.surface_pressure),code:Number(raw.current.weather_code)};
  return {latitude:raw.latitude,longitude:raw.longitude,timezone:raw.timezone,current,hourly,daily:(raw.daily.time as string[]).map((date:string,i:number)=>({sunrise:raw.daily.sunrise[i],sunset:raw.daily.sunset[i],max:raw.daily.temperature_2m_max[i],min:raw.daily.temperature_2m_min[i],code:raw.daily.weather_code[i]}))};
 }
@@ -55,7 +55,7 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
   <section className="weather-layout">
    <div className="weather-scene-panel">
     <div className="weather-scene-meta"><span><i className="stage-dot"/> LIVE CONDITIONS</span><span>{position.label.toUpperCase()}</span></div>
-    <div className="weather-scene">{active&&<WeatherScene weather={active} hour={selectedHour}/ >}{loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}</div>
+    <div className="weather-scene">{active&&<WeatherScene weather={active} hour={selectedHour} />}{loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}</div>
     <div className="weather-current"><div><span className="weather-condition"><WeatherIcon code={active?.code??0}/>{active?weatherLabel(active.code):"Loading weather"}</span><strong>{active?Math.round(active.temperature)+"°":"—"}</strong><small>{active?"Feels like "+Math.round(active.apparent)+"°":"Fetching forecast"}</small></div><div className="weather-time">{active?formatHour(active.time):"—"}<small>{selected===0?"FORECAST":"FORECAST"}</small></div></div>
    </div>
    <aside className="weather-side">
