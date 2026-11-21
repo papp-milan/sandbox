@@ -60,8 +60,8 @@ function WeatherParticles({weather,season}:{weather:HourlyWeather;season:Season}
  const color=isRain?"#ccecff":isSnow?"#f6fcff":season==="spring"?"#ffd1e2":season==="autumn"?"#d98239":season==="summer"?"#f6df9c":"#eaf7ff";
  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions,3]}/></bufferGeometry><pointsMaterial color={color} size={isRain?.045:isSnow?.075:.105} transparent opacity={isRain?.72:.9} sizeAttenuation/></points>;
 }
-function LivingWorld({weather,hour,latitude}:{weather:HourlyWeather;hour:number;latitude:number}){
- const season=getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",cloudy=kind!=="clear",golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
+function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeather;hour:number;latitude:number;seasonOverride?:Season}){
+ const season=seasonOverride??getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",cloudy=kind!=="clear",golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
  const ground=useRef<THREE.Mesh>(null),water=useRef<THREE.Mesh>(null),flash=useRef<THREE.PointLight>(null),sun=useRef<THREE.Group>(null),intro=useRef(0),clouds=useRef<THREE.Group>(null);
  const targetSky=new THREE.Color(storm?"#26364d":night?"#101d37":golden?theme.horizon:theme.sky);
  const targetGround=new THREE.Color(theme.ground);
@@ -95,6 +95,6 @@ function LivingWorld({weather,hour,latitude}:{weather:HourlyWeather;hour:number;
   {storm&&<pointLight ref={flash} position={[1,4,1]} intensity={0} distance={22} color="#dceaff"/>}
  </>;
 }
-export function WeatherScene({weather,hour,latitude=48.1372}:{weather:HourlyWeather;hour:number;latitude?:number}){
- return <Canvas dpr={[1,1.5]} camera={{position:[0,4,19],fov:42}} gl={{antialias:true,alpha:false}}><LivingWorld weather={weather} hour={hour} latitude={latitude}/></Canvas>;
+export function WeatherScene({weather,hour,latitude=48.1372,seasonOverride}:{weather:HourlyWeather;hour:number;latitude?:number;seasonOverride?:Season}){
+ return <Canvas dpr={[1,1.5]} camera={{position:[0,4,19],fov:42}} gl={{antialias:true,alpha:false}}><LivingWorld weather={weather} hour={hour} latitude={latitude} seasonOverride={seasonOverride}/></Canvas>;
 }
