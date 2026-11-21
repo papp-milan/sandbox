@@ -1233,3 +1233,45 @@ a {
 .own-fleet-grid button.ship-cell.hit::after { border-color:rgba(255,225,225,.5); }
 .own-fleet-grid button.ship-preview.placeable:hover { background:transparent; }
 .own-fleet-grid button.ship-cell { color:#f4f7f7; text-shadow:0 1px 3px #142023; }
+
+/* Battleships — reveal the complete enemy hull once a ship is sunk. */
+.ocean-grid button.revealed-ship {
+  position:relative;
+  isolation:isolate;
+  overflow:visible;
+  z-index:1;
+  background:transparent;
+  box-shadow:none;
+  color:#fff;
+  text-shadow:0 1px 3px rgba(20,8,10,.9);
+}
+.ocean-grid button.revealed-ship::before {
+  content:"";
+  position:absolute;
+  inset:3px;
+  z-index:-1;
+  border:1px solid #d59a9e;
+  background:linear-gradient(150deg,#a96d73 0%,#75474d 48%,#482d32 100%);
+  box-shadow:inset 0 1px 3px rgba(255,225,225,.3),inset 0 -3px 6px rgba(20,5,8,.4),0 0 10px rgba(174,91,101,.2);
+}
+.ocean-grid button.revealed-ship::after {
+  content:"";
+  position:absolute;
+  inset:7px 5px;
+  z-index:-1;
+  border:1px solid rgba(255,222,224,.38);
+  pointer-events:none;
+}
+.ocean-grid button.revealed-ship.ship-horizontal.ship-bow::before { border-radius:75% 3px 3px 75%; }
+.ocean-grid button.revealed-ship.ship-horizontal.ship-stern::before { border-radius:3px 75% 75% 3px; }
+.ocean-grid button.revealed-ship.ship-horizontal.ship-mid::before { border-radius:2px; }
+.ocean-grid button.revealed-ship.ship-vertical.ship-bow::before { border-radius:75% 75% 3px 3px; }
+.ocean-grid button.revealed-ship.ship-vertical.ship-stern::before { border-radius:3px 3px 75% 75%; }
+.ocean-grid button.revealed-ship.ship-vertical.ship-mid::before { border-radius:2px; }
+.ocean-grid button.revealed-ship.ship-horizontal::after { inset:8px 5px; border-left:0; border-right:0; }
+.ocean-grid button.revealed-ship.ship-vertical::after { inset:5px 8px; border-top:0; border-bottom:0; }
+.ocean-grid button.revealed-ship.ship-hit::before {
+  background:linear-gradient(150deg,#c78a8e 0%,#8f5057 48%,#5a3036 100%);
+  border-color:#f0b2b2;
+}
+.ocean-grid button.revealed-ship.ship-hit::after { border-color:rgba(255,235,235,.58); }
