@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Cloud, CloudRain, CloudSnow, CloudSun, Compass, Droplets, Gauge, LocateFixed, RefreshCw, Sun, Sunrise, Thermometer, Wind, Map, Play, Pause, ChevronLeft, ChevronRight, X, GitCompareArrows, Trees, Waves, CalendarDays } from "lucide-react";
 import { WeatherScene } from "./WeatherScene";
-import { formatDay, formatHour, weatherLabel, weatherKind, type HourlyWeather, type WeatherPayload } from "./weather-utils";
+import { formatHour, weatherLabel, weatherKind, type HourlyWeather, type WeatherPayload } from "./weather-utils";
 
 const fallback={latitude:48.1372,longitude:11.5756,label:"Munich, Germany"};
 const endpoint="https://api.open-meteo.com/v1/forecast";
@@ -14,7 +14,7 @@ function mapHour(data:Record<string,unknown>,i:number):HourlyWeather {
  return {time:String((data.time as string[])[i]),temperature:at("temperature_2m"),apparent:at("apparent_temperature"),precipitation:at("precipitation"),precipitationProbability:at("precipitation_probability"),humidity:at("relative_humidity_2m"),uv:at("uv_index"),wind:at("wind_speed_10m"),windDirection:at("wind_direction_10m"),pressure:at("surface_pressure"),visibility:at("visibility",10000)/1000,code:at("weather_code")};
 }
 function meanSeries(data:Record<string,unknown>,key:string):number[] {
- const arrays=Object.entries(data).filter(([name,value])=>name===key||name.startsWith(key+"_member")||name.startsWith(key+"_gfs")||name.startsWith(key+"_ncep")).map(([,value])=>value).filter((value):value is number[]=>Array.isArray(value)) as number[][];
+ const arrays=Object.entries(data).filter(([name])=>name===key||name.startsWith(key+"_member")||name.startsWith(key+"_gfs")||name.startsWith(key+"_ncep")).map(([,value])=>value).filter((value):value is number[]=>Array.isArray(value)) as number[][];
  if(!arrays.length)return [];
  const length=arrays[0].length;
  return Array.from({length},(_,i)=>{const values=arrays.map(a=>a[i]).filter((v):v is number=>Number.isFinite(v));return values.length?values.reduce((a,b)=>a+b,0)/values.length:0;});
