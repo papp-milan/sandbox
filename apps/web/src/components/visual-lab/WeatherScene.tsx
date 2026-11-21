@@ -60,10 +60,10 @@ function WeatherParticles({weather,season}:{weather:HourlyWeather;season:Season}
  const color=isRain?"#ccecff":isSnow?"#f6fcff":season==="spring"?"#ffd1e2":season==="autumn"?"#d98239":season==="summer"?"#f6df9c":"#eaf7ff";
  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" args={[positions,3]}/></bufferGeometry><pointsMaterial color={color} size={isRain?.045:isSnow?.075:.105} transparent opacity={isRain?.72:.9} sizeAttenuation/></points>;
 }
-function LivingWorld({weather,hour,latitude}:{weather:HourlyWeather;hour:number;latitude:number}){
- const season=getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",cloudy=kind!=="clear",golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
+function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeather;hour:number;latitude:number;seasonOverride?:Season}){
+ const season=seasonOverride??getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",foggy=kind==="fog",cloudy=kind!=="clear"&&!foggy,golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
  const ground=useRef<THREE.Mesh>(null),water=useRef<THREE.Mesh>(null),flash=useRef<THREE.PointLight>(null),sun=useRef<THREE.Group>(null),intro=useRef(0),clouds=useRef<THREE.Group>(null);
- const targetSky=new THREE.Color(storm?"#26364d":night?"#101d37":golden?theme.horizon:theme.sky);
+ const targetSky=new THREE.Color(storm?"#26364d":foggy?"#aab8bd":night?"#101d37":golden?theme.horizon:theme.sky);
  const targetGround=new THREE.Color(theme.ground);
  useFrame((state,delta)=>{
   intro.current=Math.min(1,intro.current+delta*.22);const reveal=THREE.MathUtils.smoothstep(intro.current,0,1);
@@ -77,7 +77,7 @@ function LivingWorld({weather,hour,latitude}:{weather:HourlyWeather;hour:number;
   if(clouds.current)clouds.current.position.x=Math.sin(state.clock.elapsedTime*.08)*.5;
  });
  return <>
-  <color attach="background" args={[theme.sky]}/><fog attach="fog" args={[theme.sky,13,32]}/>
+  <color attach="background" args={[foggy?"#aab8bd":theme.sky]}/><fog attach="fog" args={[foggy?"#aab8bd":theme.sky,foggy?4:13,foggy?18:32]}/>
   <ambientLight intensity={night?.48:golden?1.1:1.35}/><directionalLight position={[-5,9,5]} intensity={night?.45:golden?2.0:2.4} color={golden?"#ffd2a0":season==="winter"?"#d9edff":"#fff2d8"}/><directionalLight position={[5,4,-4]} intensity={.65} color="#c9e5ff"/>
   {night&&<Stars radius={65} depth={45} count={1700} factor={2} fade speed={.35}/>}
   {!night&&<group ref={sun}><mesh><sphereGeometry args={[.72,32,32]}/><meshStandardMaterial color="#ffe4a5" emissive="#ffb75b" emissiveIntensity={1.8}/></mesh><mesh><sphereGeometry args={[1.5,24,24]}/><meshBasicMaterial color="#ffd18a" transparent opacity={.12}/></mesh></group>}
@@ -95,6 +95,6 @@ function LivingWorld({weather,hour,latitude}:{weather:HourlyWeather;hour:number;
   {storm&&<pointLight ref={flash} position={[1,4,1]} intensity={0} distance={22} color="#dceaff"/>}
  </>;
 }
-export function WeatherScene({weather,hour,latitude=48.1372}:{weather:HourlyWeather;hour:number;latitude?:number}){
- return <Canvas dpr={[1,1.5]} camera={{position:[0,4,19],fov:42}} gl={{antialias:true,alpha:false}}><LivingWorld weather={weather} hour={hour} latitude={latitude}/></Canvas>;
+export function WeatherScene({weather,hour,latitude=48.1372,seasonOverride}:{weather:HourlyWeather;hour:number;latitude?:number;seasonOverride?:Season}){
+ return <Canvas dpr={[1,1.5]} camera={{position:[0,4,19],fov:42}} gl={{antialias:true,alpha:false}}><LivingWorld weather={weather} hour={hour} latitude={latitude} seasonOverride={seasonOverride}/></Canvas>;
 }
