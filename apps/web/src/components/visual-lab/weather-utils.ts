@@ -25,8 +25,11 @@ export function weatherKind(code:number):"clear"|"cloudy"|"fog"|"rain"|"snow"|"s
   return "storm";
 }
 export function formatHour(value:string) {
-  return new Intl.DateTimeFormat(undefined,{hour:"2-digit",minute:"2-digit"}).format(new Date(value));
+  // Open-Meteo returns wall-clock times in the requested location's timezone.
+  // Parsing a timezone-less ISO string with Date would reinterpret it in the browser timezone.
+  return value.slice(11,16) || "—";
 }
 export function formatDay(value:string) {
-  return new Intl.DateTimeFormat(undefined,{weekday:"short"}).format(new Date(value));
+  const date=value.slice(0,10);
+  return new Intl.DateTimeFormat(undefined,{weekday:"short"}).format(new Date(date+"T12:00:00"));
 }
