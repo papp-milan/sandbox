@@ -7,7 +7,7 @@ import { weatherKind, type HourlyWeather } from "./weather-utils";
 function CloudSculpture({ night, storm }: { night: boolean; storm: boolean }) {
   const cloudRef = useRef<THREE.Group>(null);
   const material = night ? "#454951" : "#e6e4df";
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (cloudRef.current) {
       cloudRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.12) * 0.12;
       cloudRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.45) * 0.08;
