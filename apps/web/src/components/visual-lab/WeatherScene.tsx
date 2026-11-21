@@ -3,6 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { weatherKind, type HourlyWeather } from "./weather-utils";
+import { WorldLandmarks } from "./WorldLandmarks";
 
 export type Season = "spring" | "summer" | "autumn" | "winter";
 export function getSeason(latitude:number, date=new Date()):Season {
@@ -135,6 +136,7 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   <mesh ref={ground} rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={1}/></mesh>
   <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,64]}/><meshStandardMaterial color={theme.water} roughness={.16} metalness={.18} transparent opacity={.94}/></mesh>
   <TerrainDetails season={season}/>
+  <WorldLandmarks season={season}/>
   {treePositions.map(([x,y,z,s],i)=><SeasonalTree key={i} position={[x,y,z]} scale={s} season={season}/>)}
   <Cabin season={season}/>
   {season==="spring"&&<group>{[-5,-3.5,4,5.5].map((x,i)=><mesh key={i} position={[x,-1.95,1.2]} rotation={[0,0,Math.sin(i)*.12]}><sphereGeometry args={[.12,10,8]}/><meshStandardMaterial color="#f3b8ce"/></mesh>)}</group>}
