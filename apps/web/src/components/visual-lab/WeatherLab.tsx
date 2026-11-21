@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, Cloud, CloudRain, CloudSnow, CloudSun, Compass, Droplets, Gauge, LocateFixed, RefreshCw, Sun, Sunrise, Thermometer, Wind } from "lucide-react";
 import { WeatherScene } from "./WeatherScene";
 import { formatDay, formatHour, weatherLabel, weatherKind, type HourlyWeather, type WeatherPayload } from "./weather-utils";
@@ -56,20 +56,20 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
    <div className="weather-scene-panel">
     <div className="weather-scene-meta"><span><i className="stage-dot"/> LIVE CONDITIONS</span><span>{position.label.toUpperCase()}</span></div>
     <div className="weather-scene">{active&&<WeatherScene weather={active} hour={selectedHour}/ >}{loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}</div>
-    <div className="weather-current"><div><span className="weather-condition"><WeatherIcon code={active?.code??0}/>{active?weatherLabel(active.code):"Loading weather"}</span><strong>{active?Math.round(active.temperature)+"°":"—"}</strong><small>{active?"Feels like "+Math.round(active.apparent)+"°":"Fetching forecast"}</small></div><div className="weather-time">{active?formatHour(active.time):"—"}<small>{selected===0?"CURRENT CONDITIONS":"FORECAST"}</small></div></div>
+    <div className="weather-current"><div><span className="weather-condition"><WeatherIcon code={active?.code??0}/>{active?weatherLabel(active.code):"Loading weather"}</span><strong>{active?Math.round(active.temperature)+"°":"—"}</strong><small>{active?"Feels like "+Math.round(active.apparent)+"°":"Fetching forecast"}</small></div><div className="weather-time">{active?formatHour(active.time):"—"}<small>{selected===0?"FORECAST":"FORECAST"}</small></div></div>
    </div>
    <aside className="weather-side">
-    <div className="weather-side-head"><span>ATMOSPHERIC DATA</span><button onClick={()=>void refresh()} aria-label="Refresh weather"><RefreshCw size={13}/></button></div>
+    <div className="weather-side-head"><span>ATMOSPHERIC DATA</span><button onClick={()=>setReload(value=>value+1)} aria-label="Refresh weather"><RefreshCw size={13}/></button></div>
     <div className="weather-metrics">{metrics.map(({label,value,icon:Icon})=><div className="weather-metric" key={label}><Icon size={14}/><span>{label}</span><strong>{value}</strong></div>)}</div>
     <div className="sun-cycle"><div><Sunrise size={15}/><span>Sunrise</span><strong>{daily[0]?.sunrise?formatHour(daily[0].sunrise):"—"}</strong></div><div><Sun size={15}/><span>Sunset</span><strong>{daily[0]?.sunset?formatHour(daily[0].sunset):"—"}</strong></div></div>
    </aside>
   </section>
   <section className="forecast-panel">
    <div className="forecast-heading"><div><p className="visual-eyebrow">MOVE THROUGH TIME</p><h2>Hourly forecast</h2></div><span>DRAG TO EXPLORE · 24 HOURS</span></div>
-   {hours.length>0&&<><input aria-label="Select forecast hour" className="weather-timeline" type="range" min="0" max={Math.max(0,hours.length-1)} value={selected} onChange={e=>setSelected(Number(e.target.value))}/><div className="timeline-labels"><span>{formatHour(hours[0].time)}</span><span>NOW</span><span>{formatDay(hours[Math.min(hours.length-1,selected+23)].time)}</span></div><div className="hour-strip">{visible.map((h,i)=><button key={h.time} className={selected+i===selected?"hour-card selected": "hour-card"} onClick={()=>setSelected(selected+i)}><span>{formatHour(h.time)}</span><WeatherIcon code={h.code}/><strong>{Math.round(h.temperature)}°</strong><small>{Math.round(h.precipitationProbability)}%</small></button>)}</div></>}
+   {hours.length>0&&<><input aria-label="Select forecast hour" className="weather-timeline" type="range" min="0" max={Math.max(0,hours.length-1)} value={selected} onChange={e=>setSelected(Number(e.target.value))}/><div className="timeline-labels"><span>{formatHour(hours[0].time)}</span><span>SELECTED</span><span>{formatDay(hours[Math.min(hours.length-1,selected+23)].time)}</span></div><div className="hour-strip">{visible.map((h,i)=><button key={h.time} className={selected+i===selected?"hour-card selected": "hour-card"} onClick={()=>setSelected(selected+i)}><span>{formatHour(h.time)}</span><WeatherIcon code={h.code}/><strong>{Math.round(h.temperature)}°</strong><small>{Math.round(h.precipitationProbability)}%</small></button>)}</div></>}
   </section>
   <section className="forecast-panel week-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">LOOK AHEAD</p><h2>Next 7 days</h2></div><span>DAILY OUTLOOK</span></div><div className="week-strip">{daily.map((d,i)=><div className="day-card" key={d.sunrise}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong></div>)}</div></section>
-  {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>void refresh()}>Try again</button></p>}
+  {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
   <p className="weather-attribution">WEATHER DATA BY OPEN-METEO · {locationNote.toUpperCase()} · UPDATES ON REFRESH</p>
  </main>;
 }
