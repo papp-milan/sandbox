@@ -40,11 +40,15 @@ function SeasonalTree({position,scale,season}:{position:[number,number,number];s
 function Mountain({position,scale,season}:{position:[number,number,number];scale:[number,number,number];season:Season}){
  return <group position={position} scale={scale}><mesh><coneGeometry args={[1,2.8,7,1]}/><meshStandardMaterial color={season==="winter"?"#8198a8":season==="autumn"?"#6f6258":"#647e83"} roughness={1}/></mesh><mesh position={[0,.68,.02]}><coneGeometry args={[.43,.9,7,1]}/><meshStandardMaterial color={season==="winter"?"#f3f8fb":"#b8c7c4"} roughness={1}/></mesh></group>;
 }
-function Cloud({position,scale=1,storm=false}:{position:[number,number,number];scale?:number;storm?:boolean}){
+function Cloud({position,scale=1,storm=false,form="cumulus"}:{position:[number,number,number];scale?:number;storm?:boolean;form?:"cumulus"|"stratus"|"cirrus"}){
  const ref=useRef<THREE.Group>(null);
- useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime;ref.current.position.x=position[0]+Math.sin(t*.075+position[2])*.9;ref.current.position.y=position[1]+Math.sin(t*.22+position[0])*.1;ref.current.rotation.z=Math.sin(t*.08+position[2])*.018;ref.current.scale.setScalar(scale*(1+Math.sin(t*.18+position[0])*.018));}});
- const puffs=[[-1.05,-.08,0,.78],[ -.45,.28,0,.9],[.25,.42,0,1.02],[.95,.12,0,.82],[-.45,-.32,.08,.72],[.48,-.28,.08,.76]];
- return <group ref={ref} position={position} scale={scale}>{puffs.map(([x,y,z,r],i)=><mesh key={i} position={[x,y,z]}><sphereGeometry args={[r,24,18]}/><meshStandardMaterial color={storm?"#435267":"#f4f7f5"} roughness={1} transparent opacity={storm?.96:.94}/></mesh>)}</group>;
+ useFrame(({clock})=>{if(ref.current){const t=clock.elapsedTime;ref.current.position.x=position[0]+Math.sin(t*(form==="cirrus"?.035:.06)+position[2])*(form==="cirrus"?1.5:.8);ref.current.position.y=position[1]+Math.sin(t*.17+position[0])*.08;ref.current.rotation.z=Math.sin(t*.055+position[2])*(form==="cirrus"?.025:.012);}});
+ const puffs=form==="cumulus"
+  ?[[-1.05,-.08,0,.72],[-.48,.28,0,.9],[.28,.38,0,1.02],[.98,.08,0,.76],[-.42,-.3,.08,.66],[.48,-.28,.08,.72]]
+  :form==="stratus"
+  ?[[-1.45,0,0,.58],[-.65,.08,0,.62],[.2,.04,0,.68],[1.05,-.02,0,.6],[1.65,-.04,0,.48]]
+  :[[-1.35,0,0,.28],[-.65,.08,0,.22],[.05,.02,0,.34],[.8,.12,0,.24],[1.45,.04,0,.2]];
+ return <group ref={ref} position={position} scale={scale}>{puffs.map(([x,y,z,r],i)=><mesh key={i} position={[x,y,z]} scale={form==="stratus"?[1.65,.48,.75]:form==="cirrus"?[2.4,.42,.6]:[1,1,1]}><sphereGeometry args={[r,24,18]}/><meshStandardMaterial color={storm?"#435267":form==="cirrus"?"#f7fbff":form==="stratus"?"#d9e2e4":"#f4f7f5"} roughness={1} transparent opacity={form==="cirrus"?.76:form==="stratus"?.82:storm?.96:.94}/></mesh>)}</group>;
 }
 function Cabin({season}:{season:Season}){
  return <group position={[2.3,-1.85,-2.2]} scale={.72}>
@@ -153,7 +157,7 @@ function BirdFlock({weather}:{weather:HourlyWeather}){
 function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeather;hour:number;latitude:number;seasonOverride?:Season}){
  const season=seasonOverride??getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",foggy=kind==="fog",cloudy=kind!=="clear"&&!foggy,golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
  const ground=useRef<THREE.Mesh>(null),water=useRef<THREE.Mesh>(null),flash=useRef<THREE.PointLight>(null),sun=useRef<THREE.Group>(null),intro=useRef(0),clouds=useRef<THREE.Group>(null);
- const targetSky=new THREE.Color(storm?"#26364d":foggy?"#aab8bd":night?"#101d37":golden?theme.horizon:theme.sky);
+ const targetSky=new THREE.Color(storm?"#26364d":foggy?"#aab8bd":kind==="cloudy"?"#91aab5":night?"#101d37":golden?theme.horizon:theme.sky);
  const targetGround=new THREE.Color(theme.ground);
  useFrame((state,delta)=>{
   intro.current=Math.min(1,intro.current+delta*.22);const reveal=THREE.MathUtils.smoothstep(intro.current,0,1);
@@ -167,14 +171,18 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   if(clouds.current)clouds.current.position.x=Math.sin(state.clock.elapsedTime*.08)*.5;
  });
  return <>
-  <color attach="background" args={[foggy?"#aab8bd":theme.sky]}/><fog attach="fog" args={[foggy?"#aab8bd":theme.sky,foggy?4:13,foggy?18:32]}/>
+  <color attach="background" args={[foggy?"#aab8bd":kind==="cloudy"?"#91aab5":theme.sky]}/><fog attach="fog" args={[foggy?"#aab8bd":kind==="cloudy"?"#91aab5":theme.sky,foggy?2.5:38,foggy?15:100]}/>
   <ambientLight intensity={night?.48:golden?1.1:1.35}/><directionalLight position={[-5,9,5]} intensity={night?.45:golden?2.0:2.4} color={golden?"#ffd2a0":season==="winter"?"#d9edff":"#fff2d8"}/><directionalLight position={[5,4,-4]} intensity={.65} color="#c9e5ff"/>
   {night&&<Stars radius={65} depth={45} count={1700} factor={2} fade speed={.35}/>}
   {!night&&<group ref={sun}><mesh><sphereGeometry args={[.72,32,32]}/><meshStandardMaterial color="#ffe4a5" emissive="#ffb75b" emissiveIntensity={1.8}/></mesh><mesh><sphereGeometry args={[1.5,24,24]}/><meshBasicMaterial color="#ffd18a" transparent opacity={.12}/></mesh></group>}
   {night&&<mesh position={[-4,4,-5]}><sphereGeometry args={[.48,32,24]}/><meshStandardMaterial color="#e7f0ff" emissive="#b8d5ff" emissiveIntensity={1.2}/></mesh>}
   <group position={[0,0,-5]}><Mountain position={[-7,-.1,0]} scale={[3.3,2.8,1]} season={season}/><Mountain position={[-3.7,.1,-.6]} scale={[3.8,3.5,1]} season={season}/><Mountain position={[.2,-.1,-.9]} scale={[4.5,3.7,1]} season={season}/><Mountain position={[5,-.05,-.5]} scale={[3.6,3.2,1]} season={season}/><Mountain position={[8,-.1,0]} scale={[3,2.7,1]} season={season}/></group>
   {foggy&&<FogBanks/>}
-  {cloudy&&<group ref={clouds}><Cloud position={[-4,3,-3]} scale={storm?1.6:1.2} storm={storm}/><Cloud position={[1.5,3.7,-4]} scale={storm?1.8:1.1} storm={storm}/><Cloud position={[6,2.9,-3]} scale={.9} storm={storm}/></group>}
+  {cloudy&&<group ref={clouds}>
+   <Cloud position={[-4.8,3.25,-4.5]} scale={storm?1.55:1.05} storm={storm} form="cumulus"/>
+   <Cloud position={[1.1,3.65,-5.2]} scale={storm?1.8:1.25} storm={storm} form="stratus"/>
+   <Cloud position={[6.1,4.15,-6]} scale={storm?1.1:.95} storm={storm} form="cirrus"/>
+  </group>}
   {!night&&<BirdFlock weather={weather}/>}
   <mesh ref={ground} rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={1}/></mesh>
   <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,96,48]}/><meshStandardMaterial color={theme.water} roughness={.12} metalness={.22} transparent opacity={.94}/></mesh>
