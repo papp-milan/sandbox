@@ -1304,3 +1304,52 @@ a {
 .own-fleet-grid button.ship-preview.preview-invalid::after {
   border-color: rgba(255,220,220,.78);
 }
+
+
+/* Battleships — cinematic impact feedback when either fleet loses a ship. */
+.games-lab.battle-impact {
+  transform-origin: 50% 45%;
+  animation: battleship-screen-shake .68s cubic-bezier(.36,.07,.19,.97) both;
+}
+.games-lab.battle-impact::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  animation: battleship-impact-flash .68s ease-out both;
+}
+.games-lab.battle-impact.impact-enemy::after {
+  background: radial-gradient(ellipse at 35% 55%, rgba(221,112,112,.22), transparent 58%);
+}
+.games-lab.battle-impact.impact-player::after {
+  background: radial-gradient(ellipse at 65% 45%, rgba(220,170,105,.2), transparent 58%);
+}
+.ocean-grid button.revealed-ship,
+.own-fleet-grid button.ship-cell.sunk {
+  animation: battleship-ship-sunk .85s cubic-bezier(.16,.8,.24,1) both;
+}
+@keyframes battleship-screen-shake {
+  0%,100% { transform: translate3d(0,0,0); }
+  10% { transform: translate3d(-5px,2px,0) rotate(-.12deg); }
+  22% { transform: translate3d(5px,-2px,0) rotate(.12deg); }
+  34% { transform: translate3d(-4px,1px,0); }
+  46% { transform: translate3d(3px,-1px,0); }
+  58% { transform: translate3d(-2px,0,0); }
+  72% { transform: translate3d(1px,0,0); }
+}
+@keyframes battleship-impact-flash {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  42% { opacity: .5; }
+  100% { opacity: 0; }
+}
+@keyframes battleship-ship-sunk {
+  0% { filter: brightness(2.1) saturate(1.5); transform: scale(1.06); }
+  35% { filter: brightness(1.35); transform: scale(.97); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .games-lab.battle-impact,.games-lab.battle-impact::after,
+  .ocean-grid button.revealed-ship,.own-fleet-grid button.ship-cell.sunk { animation:none; }
+}
