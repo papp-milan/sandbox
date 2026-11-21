@@ -1038,3 +1038,12 @@ a {
 
 .radar-overlay-crop { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
 .radar-overlay { position:absolute; max-width:none; display:block; pointer-events:none; }
+
+/* Permanent seasonal scene design controls */
+.scene-test-panel { border-style:solid; border-color:#343d43; border-radius:8px; background:linear-gradient(135deg,#141b20,#0d1216); box-shadow:0 12px 34px rgba(0,0,0,.14); }
+.scene-test-heading h2 { letter-spacing:-.035em; }
+.scene-test-heading > button { border-radius:4px; }
+.scene-test-controls { animation:scene-controls-in .28s ease-out both; }
+.scene-test-note { color:#8b9ba3; }
+@keyframes scene-controls-in { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .scene-test-controls { animation:none; } }
