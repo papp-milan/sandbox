@@ -84,7 +84,7 @@ function FogBanks(){
   </group>)}
  </group>;
 }
-function TerrainDetails({season}:{season:Season}){
+function TerrainDetails({season,groundBump}:{season:Season;groundBump:THREE.Texture}){
  const palette=themes[season];
  const rockColor=season==="winter"?"#aabac4":season==="autumn"?"#756253":"#68796e";
  const pathColor=season==="winter"?"#d2dfe4":season==="autumn"?"#9b7958":"#b7a98a";
@@ -101,6 +101,14 @@ function TerrainDetails({season}:{season:Season}){
   {rocks.map((r,i)=><mesh castShadow receiveShadow key={"rock"+i} position={[r.x,-2.03+r.s*.28,r.z]} rotation={[r.rot*.1,r.rot,r.rot*.17]} scale={[r.s*1.35,r.s,r.s*.9]}><dodecahedronGeometry args={[1,0]}/><meshStandardMaterial color={rockColor} roughness={.92} bumpMap={groundBump} bumpScale={.035}/></mesh>)}
   {shrubs.map((b,i)=><group key={"shrub"+i} position={[b.x,-1.98,b.z]} scale={b.s}><mesh position={[0,.22,0]}><icosahedronGeometry args={[.65,1]}/><meshStandardMaterial color={palette.foliage} roughness={.94} bumpMap={groundBump} bumpScale={.018}/></mesh><mesh position={[.32,.16,.08]}><icosahedronGeometry args={[.43,1]}/><meshStandardMaterial color={palette.foliage2} roughness={1}/></mesh></group>)}
   {grass.map((g,i)=><group key={"grass"+i} position={[g.x,-1.98,g.z]} rotation={[0,g.r,0]}>{[0,1,2].map(j=><mesh key={j} position={[(j-1)*.09,.18,0]} rotation={[0,0,(j-1)*-.22]}><coneGeometry args={[.055,.42,5]}/><meshStandardMaterial color={season==="winter"?"#dce8eb":palette.foliage2} roughness={1}/></mesh>)}</group>)}
+  {/* Small ground-cover clusters add scale and texture between the large landmarks. */}
+  {Array.from({length:26},(_,i)=>({x:-8.8+(i*1.47)%17.6,z:.15+(i*1.83)%4.2,s:.045+(i%4)*.018})).map((p,i)=><group key={"groundcover"+i} position={[p.x,-1.985,p.z]} rotation={[0,i*.91,0]}><mesh castShadow position={[0,.045,0]} scale={[p.s*1.8,p.s*.7,p.s]}><dodecahedronGeometry args={[1,0]}/><meshStandardMaterial color={i%3===0?palette.foliage2:rockColor} roughness={.98} bumpMap={groundBump} bumpScale={.025}/></mesh>{i%4===0&&<mesh position={[.035,.11,.02]}><sphereGeometry args={[.055,8,6]}/><meshStandardMaterial color={season==="spring"?"#e9a9c4":season==="autumn"?"#d98545":"#d6e5d0"}/></mesh>}</group>)}
+  {Array.from({length:9},(_,i)=>({x:-7.5+i*1.82,z:3.35+(i%2)*.2})).map((p,i)=><group key={"mushroom"+i} position={[p.x,-1.98,p.z]} scale={.55+(i%3)*.16}><mesh position={[0,.13,0]}><cylinderGeometry args={[.035,.05,.26,7]}/><meshStandardMaterial color="#e7ddc9" roughness={1}/></mesh><mesh position={[0,.28,0]} scale={[1,.48,1]}><sphereGeometry args={[.13,12,8]}/><meshStandardMaterial color={season==="autumn"?"#c86e3c":season==="winter"?"#e9edf0":i%2?"#d98b70":"#c47a58"} roughness={.9} bumpMap={groundBump} bumpScale={.015}/></mesh></group>)}
+  <group position={[2.65,-1.98,3.55]} rotation={[0,0,-.12]}>
+   <mesh castShadow receiveShadow position={[0,.18,0]} rotation={[0,0,.16]}><cylinderGeometry args={[.12,.17,1.35,9]}/><meshStandardMaterial color="#66503a" roughness={1} bumpMap={groundBump} bumpScale={.04}/></mesh>
+   {[-.42,-.08,.28].map((x,i)=><mesh key={i} position={[x,.27,.02]} rotation={[0,0,.5+i*.35]}><coneGeometry args={[.18,.34,5]}/><meshStandardMaterial color={palette.foliage} roughness={1}/></mesh>)}
+  </group>
+
   {path.map((p,i)=><mesh key={"path"+i} position={[p.x,-2.015,p.z]} rotation={[-Math.PI/2,0,(i%2)*.12]} scale={[p.s*1.5,p.s*.7,.04]}><circleGeometry args={[1,8]}/><meshStandardMaterial color={pathColor} roughness={1}/></mesh>)}
   {[-6.7,-5.9,-5.1,5.1,5.9,6.7].map((x,i)=><group key={"flower"+i} position={[x,-1.97,2.8+(i%2)*.25]}><mesh position={[0,.18,0]}><cylinderGeometry args={[.012,.018,.36,5]}/><meshStandardMaterial color="#477344"/></mesh><mesh position={[0,.38,0]}><sphereGeometry args={[.105,10,8]}/><meshStandardMaterial color={season==="spring"?"#f5bfd4":season==="summer"?"#f2d16e":season==="autumn"?"#d77b37":"#f4f7f8"}/></mesh></group>)}
   <group position={[-3.9,-1.94,-2.2]}>
@@ -201,7 +209,7 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   <mesh ref={ground} receiveShadow rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={.96} bumpMap={groundBump} bumpScale={.075}/></mesh>
   <mesh ref={water} receiveShadow rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,96,48]}/><meshStandardMaterial color={theme.water} roughness={.18} metalness={.28} transparent opacity={.97}/></mesh>
   <WaterRipples/>
-  <TerrainDetails season={season}/>
+  <TerrainDetails season={season} groundBump={groundBump}/>
   <WorldLandmarks season={season}/>
   {treePositions.map(([x,y,z,s],i)=><SeasonalTree key={i} position={[x,y,z]} scale={s} season={season}/>)}
   <Cabin season={season}/>
