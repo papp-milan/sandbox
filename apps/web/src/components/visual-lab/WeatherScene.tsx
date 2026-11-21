@@ -54,7 +54,7 @@ function Cabin({season}:{season:Season}){
 }
 function WeatherParticles({weather,season}:{weather:HourlyWeather;season:Season}){
  const ref=useRef<THREE.Points>(null);
- const kind=weatherKind(weather.code),isSnow=kind==="snow"||season==="winter"&&kind!=="rain"&&kind!=="storm",isRain=kind==="rain"||kind==="storm",count=isRain?1100:season==="spring"||season==="autumn"?260:420;
+ const kind=weatherKind(weather.code),isSnow=kind==="snow",isRain=kind==="rain"||kind==="storm",count=isRain?1100:isSnow?460:season==="spring"||season==="autumn"?260:season==="summer"?110:0;
  const positions=useMemo(()=>{const a=new Float32Array(count*3);for(let i=0;i<count;i++){a[i*3]=(Math.random()-.5)*24;a[i*3+1]=Math.random()*12-3;a[i*3+2]=(Math.random()-.5)*14;}return a;},[count]);
  useFrame((_,delta)=>{if(!ref.current)return;const p=ref.current.geometry.attributes.position;for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);if(isRain){y-=delta*13;x+=delta*(weather.wind/45+.25);}else{y-=delta*(isSnow?.65:1.05);x+=delta*(Math.sin(y*1.7+i)*.18+weather.wind/90);z+=Math.sin(y+i)*delta*.08;}if(y< -2.5){y=8+Math.random()*3;x=(Math.random()-.5)*24;z=(Math.random()-.5)*14;}p.setXYZ(i,x,y,z);}p.needsUpdate=true;});
  const color=isRain?"#ccecff":isSnow?"#f6fcff":season==="spring"?"#ffd1e2":season==="autumn"?"#d98239":season==="summer"?"#f6df9c":"#eaf7ff";
