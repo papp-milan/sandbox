@@ -38,7 +38,7 @@ function WeatherWorld({weather,hour}:{weather:HourlyWeather;hour:number}) {
    <mesh><sphereGeometry args={[1.42,32,32]}/><meshBasicMaterial color="#ffc76d" transparent opacity={.12}/></mesh>
   </group>}
   {night&&<group position={[-2.8,2.8,-3]}><mesh><sphereGeometry args={[.52,40,32]}/><meshStandardMaterial color="#f0f4ff" emissive="#c7ddff" emissiveIntensity={.55}/></mesh><mesh><torusGeometry args={[.78,.025,8,64]}/><meshBasicMaterial color="#dce8ff" transparent opacity={.35}/></mesh></group>}
-  {kind!=="clear"&&<><CloudLayer night={night} dense={rainy||kind==="storm"||kind==="cloudy"} scale={kind==="storm"?1.65:1.35}/><CloudLayer night={night} dense={true} offset={-4.2} scale={.72}/><CloudLayer night={night} dense={true} offset={4.3} scale={.8}/></>}
+  {kind!=="clear"&&<><CloudLayer night={night} dense={rainy||kind==="cloudy"} scale={rainy?1.65:1.35}/><CloudLayer night={night} dense={true} offset={-4.2} scale={.72}/><CloudLayer night={night} dense={true} offset={4.3} scale={.8}/></>}
   {rainy&&<points ref={particlesRef}><bufferGeometry><bufferAttribute attach="attributes-position" args={[particles,3]}/></bufferGeometry><pointsMaterial color="#d8efff" size={.055} transparent opacity={.82} sizeAttenuation/></points>}
   {snowy&&<points ref={particlesRef}><bufferGeometry><bufferAttribute attach="attributes-position" args={[particles,3]}/></bufferGeometry><pointsMaterial color="#fff" size={.095} transparent opacity={.98} sizeAttenuation/></points>}
   {kind==="storm"&&<pointLight ref={flashRef} position={[1.5,3,1]} intensity={0} distance={16} color="#eaf2ff"/>}
