@@ -1016,3 +1016,22 @@ a {
 @media(prefers-reduced-motion:reduce) {
  .weather-scene canvas { animation:none; }
 }
+
+/* Temporary Seasonal Weather preview controls */
+.scene-test-panel { margin-top:22px; border:1px dashed #454545; background:linear-gradient(135deg,#121416,#0c0d0e); padding:18px 20px; }
+.scene-test-heading { display:flex; justify-content:space-between; align-items:center; gap:18px; }
+.scene-test-heading .visual-eyebrow { margin-bottom:7px; }
+.scene-test-heading h2 { display:flex; align-items:center; gap:9px; margin:0; font-size:18px; font-weight:500; }
+.scene-test-heading h2 svg { color:#aaa; }
+.scene-test-heading p:last-child { margin:7px 0 0; color:#777; font-size:11px; }
+.scene-test-heading > button { border:1px solid #484848; background:#17191b; color:#ddd; padding:10px 13px; font:9px var(--mono); letter-spacing:.08em; cursor:pointer; white-space:nowrap; }
+.scene-test-heading > button:hover,.scene-test-heading > button.active { border-color:#aaa; background:#222; }
+.scene-test-controls { display:flex; align-items:end; flex-wrap:wrap; gap:14px; margin-top:18px; padding-top:16px; border-top:1px solid #292929; }
+.scene-test-controls label { display:grid; gap:7px; min-width:180px; color:#888; font:9px var(--mono); letter-spacing:.08em; }
+.scene-test-controls select { min-width:180px; padding:10px 12px; border:1px solid #393939; background:#111; color:#eee; font:11px "Space Grotesk",sans-serif; }
+.scene-test-note { margin-left:auto; color:#666; font:9px var(--mono); }
+.radar-tile { position:absolute; width:256px; height:256px; }
+.radar-tile > img:first-child { display:block; width:256px; height:256px; }
+.radar-overlay { position:absolute; left:0; top:0; max-width:none; pointer-events:none; }
+.radar-tile-plane { position:absolute; inset:0; }
+@media(max-width:700px) { .scene-test-panel { padding:14px; } .scene-test-heading { align-items:flex-start; flex-direction:column; } .scene-test-controls { align-items:stretch; flex-direction:column; } .scene-test-controls label,.scene-test-controls select { width:100%; } .scene-test-note { margin-left:0; } }
