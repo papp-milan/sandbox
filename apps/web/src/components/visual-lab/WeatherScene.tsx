@@ -1,56 +1,105 @@
 import { useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Cloud, Stars } from "@react-three/drei";
+import { Stars } from "@react-three/drei";
 import * as THREE from "three";
 import { weatherKind, type HourlyWeather } from "./weather-utils";
 
-function Atmosphere({ weather, hour }: { weather: HourlyWeather; hour:number }) {
-  const kind = weatherKind(weather.code);
+function CloudSculpture({ night, storm }: { night: boolean; storm: boolean }) {
   const cloudRef = useRef<THREE.Group>(null);
+  const material = night ? "#454951" : "#e6e4df";
+  useFrame((state, delta) => {
+    if (cloudRef.current) {
+      cloudRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.12) * 0.12;
+      cloudRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.45) * 0.08;
+    }
+  });
+  const lobes = [
+    [-1.65, -0.12, 0, 0.82], [-1.02, 0.34, 0.12, 1.02], [-0.18, 0.58, 0, 1.1],
+    [0.72, 0.32, -0.08, 1.0], [1.48, -0.08, 0.08, 0.78], [-0.9, -0.42, 0.28, 0.82],
+    [0.05, -0.48, 0.3, 0.88], [0.98, -0.42, 0.25, 0.7], [-1.95, -0.55, 0.18, 0.48],
+    [1.92, -0.48, 0.2, 0.48]
+  ];
+  return <group ref={cloudRef} position={[0, 1.05, 0]}>
+    {lobes.map(([x, y, z, scale], i) => <mesh key={i} position={[x, y, z]} scale={scale}>
+      <sphereGeometry args={[0.78, 32, 32]} />
+      <meshStandardMaterial color={material} roughness={0.82} metalness={0.06} />
+    </mesh>)}
+    {storm && <mesh position={[0, -1.18, 0.25]} rotation={[0, 0, -0.08]}>
+      <coneGeometry args={[0.22, 1.35, 5]} />
+      <meshStandardMaterial color="#d8d9db" emissive="#777b82" emissiveIntensity={0.25} />
+    </mesh>}
+  </group>;
+}
+
+function Atmosphere({ weather, hour }: { weather: HourlyWeather; hour: number }) {
+  const kind = weatherKind(weather.code);
   const rainRef = useRef<THREE.Points>(null);
-  const sunRef = useRef<THREE.Mesh>(null);
+  const sunRef = useRef<THREE.Group>(null);
   const night = hour < 6 || hour >= 20;
-  const clouds = kind !== "clear";
-  const rain = kind === "rain" || kind === "storm";
-  const snow = kind === "snow";
+  const rainy = kind === "rain" || kind === "storm";
+  const snowy = kind === "snow";
+  const cloudy = kind !== "clear";
+  const palette = kind === "storm"
+    ? { sky: night ? "#171923" : "#55535d", accent: "#aaa9b8" }
+    : rainy ? { sky: night ? "#202a35" : "#778995", accent: "#a9c4d4" }
+    : snowy ? { sky: night ? "#202a34" : "#aebbc4", accent: "#dce8ed" }
+    : kind === "fog" ? { sky: "#a7a7a4", accent: "#d6d6d1" }
+    : { sky: night ? "#171b2a" : "#c5b9a6", accent: "#e8c98e" };
   const particles = useMemo(() => {
-    const values = new Float32Array(900 * 3);
-    for (let i=0;i<900;i++) { values[i*3]=(Math.random()-.5)*13; values[i*3+1]=Math.random()*8; values[i*3+2]=(Math.random()-.5)*9; }
+    const values = new Float32Array(650 * 3);
+    for (let i = 0; i < 650; i++) {
+      values[i * 3] = (Math.random() - 0.5) * 12;
+      values[i * 3 + 1] = Math.random() * 8 - 1;
+      values[i * 3 + 2] = (Math.random() - 0.5) * 7;
+    }
     return values;
   }, []);
   useFrame((state, delta) => {
-    if (cloudRef.current) cloudRef.current.rotation.y += delta * (weather.wind / 3600 + .006);
-    if (rainRef.current && (rain || snow)) {
-      const p = rainRef.current.geometry.attributes.position;
-      for(let i=0;i<p.count;i++) {
-        let y=p.getY(i)-(rain ? delta*9 : delta*1.5);
-        if(y < -2) y=7;
-        p.setY(i,y);
-        if(snow) { p.setX(i,p.getX(i)+Math.sin(state.clock.elapsedTime+i)*delta*.18); }
+    if (rainRef.current && (rainy || snowy)) {
+      const positions = rainRef.current.geometry.attributes.position;
+      for (let i = 0; i < positions.count; i++) {
+        let y = positions.getY(i) - delta * (rainy ? 10 : 1.35);
+        if (y < -2.8) y = 6;
+        positions.setY(i, y);
+        if (snowy) positions.setX(i, positions.getX(i) + Math.sin(state.clock.elapsedTime + i) * delta * 0.2);
       }
-      p.needsUpdate=true;
+      positions.needsUpdate = true;
     }
-    if (sunRef.current) sunRef.current.position.set(Math.cos((hour/24)*Math.PI*2)*5, Math.sin((hour/24)*Math.PI*2)*3.2+1.5, -2.5);
+    if (sunRef.current) {
+      const daylight = Math.max(0, Math.sin(((hour - 6) / 12) * Math.PI));
+      sunRef.current.position.set(Math.cos((hour / 24) * Math.PI * 2) * 3.9, 0.8 + daylight * 1.8, -2.6);
+    }
   });
   return <>
-    <color attach="background" args={[night ? "#080a0d" : "#17191c"]}/>
-    <fog attach="fog" args={[night ? "#080a0d" : "#17191c", 10, 24]}/>
-    <ambientLight intensity={night ? .24 : .65}/>
-    <directionalLight position={[4,8,5]} intensity={night ? .45 : 1.5} color="#e6e6e6"/>
-    {night && <Stars radius={70} depth={35} count={900} factor={2.2} fade speed={.25}/>}
-    <mesh ref={sunRef}><sphereGeometry args={[.48,32,32]}/><meshBasicMaterial color={night ? "#aeb6c4" : "#f0f0e8"}/></mesh>
-    <mesh position={[0,-1.55,0]} scale={[1, .23, .72]}><sphereGeometry args={[4.8,64,48]}/><meshStandardMaterial color="#33373b" roughness={.92} metalness={.12}/></mesh>
-    <mesh position={[0,-1.3,0]} scale={[1,.18,.73]}><sphereGeometry args={[4.25,64,48]}/><meshStandardMaterial color="#171a1d" roughness={.85}/></mesh>
-    <group ref={cloudRef}>
-      {clouds && <><Cloud position={[-2.8,2.1,-1.2]} speed={.12} opacity={kind==="fog"?.22:.62} segments={24} bounds={[4,1.1,2]}/><Cloud position={[2.4,2.8,-2]} speed={.1} opacity={kind==="fog"?.2:.52} segments={20} bounds={[3.5,.9,1.8]}/><Cloud position={[.2,3.5,-3.5]} speed={.08} opacity={.34} segments={18} bounds={[3,1,1.5]}/></>}
-    </group>
-    {(rain || snow) && <points ref={rainRef}><bufferGeometry><bufferAttribute attach="attributes-position" args={[particles,3]}/></bufferGeometry><pointsMaterial color="#c8cdd2" size={snow?.055:.025} transparent opacity={snow?.8:.55} sizeAttenuation/></points>}
-    {kind === "storm" && <pointLight position={[0,3,0]} intensity={2.2} distance={9} color="#dce3ea"/>}
-    <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.31,0]}><circleGeometry args={[4.1,64]}/><meshBasicMaterial color="#262a2e" transparent opacity={.75}/></mesh>
+    <color attach="background" args={[palette.sky]} />
+    <fog attach="fog" args={[palette.sky, 10, 25]} />
+    <ambientLight intensity={night ? 0.42 : 0.9} />
+    <directionalLight position={[-4, 7, 5]} intensity={night ? 0.8 : 1.8} color="#fff4df" />
+    <directionalLight position={[4, 1, -4]} intensity={0.65} color={palette.accent} />
+    {night && <Stars radius={65} depth={35} count={700} factor={2} fade speed={0.25} />}
+    {!cloudy && <group ref={sunRef}>
+      <mesh><sphereGeometry args={[0.82, 48, 48]} /><meshStandardMaterial color="#f2c879" emissive="#e9a94c" emissiveIntensity={0.8} roughness={0.4} /></mesh>
+      <mesh><sphereGeometry args={[1.12, 32, 32]} /><meshBasicMaterial color="#f2c879" transparent opacity={0.13} /></mesh>
+    </group>}
+    {cloudy && <CloudSculpture night={night} storm={kind === "storm"} />}
+    {rainy && <points ref={rainRef}>
+      <bufferGeometry><bufferAttribute attach="attributes-position" args={[particles, 3]} /></bufferGeometry>
+      <pointsMaterial color="#d8e4ed" size={0.035} transparent opacity={0.72} sizeAttenuation />
+    </points>}
+    {snowy && <points ref={rainRef}>
+      <bufferGeometry><bufferAttribute attach="attributes-position" args={[particles, 3]} /></bufferGeometry>
+      <pointsMaterial color="#ffffff" size={0.075} transparent opacity={0.92} sizeAttenuation />
+    </points>}
+    {kind === "storm" && <pointLight position={[0, 2.5, 1]} intensity={2.5} distance={8} color="#e0e3f0" />}
+    <mesh position={[0, -2.55, -0.5]} scale={[1.7, 0.18, 0.65]}>
+      <sphereGeometry args={[2.4, 48, 32]} />
+      <meshStandardMaterial color={night ? "#252a32" : "#777b7b"} roughness={1} transparent opacity={0.5} />
+    </mesh>
   </>;
 }
-export function WeatherScene({weather,hour}:{weather:HourlyWeather;hour:number}) {
- return <Canvas dpr={[1,1.5]} camera={{position:[0,2.5,10],fov:42}} gl={{antialias:true,alpha:false}}>
-   <Atmosphere weather={weather} hour={hour}/>
- </Canvas>;
+
+export function WeatherScene({ weather, hour }: { weather: HourlyWeather; hour: number }) {
+  return <Canvas dpr={[1, 1.5]} camera={{ position: [0, 1.25, 9], fov: 42 }} gl={{ antialias: true, alpha: false }}>
+    <Atmosphere weather={weather} hour={hour} />
+  </Canvas>;
 }
