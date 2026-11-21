@@ -1,113 +1,107 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Cloud, CloudRain, CloudSnow, CloudSun, Compass, Droplets, Gauge, LocateFixed, RefreshCw, Sun, Sunrise, Thermometer, Wind } from "lucide-react";
+import { ArrowLeft, Cloud, CloudRain, CloudSnow, CloudSun, Compass, Droplets, Gauge, LocateFixed, RefreshCw, Sun, Sunrise, Thermometer, Wind, Map, Play, Pause, ChevronLeft, ChevronRight, X, GitCompareArrows, Trees, Waves, CalendarDays } from "lucide-react";
 import { WeatherScene } from "./WeatherScene";
 import { formatDay, formatHour, weatherLabel, weatherKind, type HourlyWeather, type WeatherPayload } from "./weather-utils";
 
-const fallback = { latitude:48.1372, longitude:11.5756, label:"Munich, Germany" };
-const endpoint = "https://api.open-meteo.com/v1/forecast";
+const fallback={latitude:48.1372,longitude:11.5756,label:"Munich, Germany"};
+const endpoint="https://api.open-meteo.com/v1/forecast";
+const ensembleEndpoint="https://ensemble-api.open-meteo.com/v1/ensemble";
+type DailyWeather={date:string;sunrise:string;sunset:string;max:number;min:number;code:number;precipitation:number;snowfall:number;wind:number;cloud:number;confidence:"forecast"|"ensemble"};
+type RadarFrame={time:number;path:string};
+type RadarManifest={host:string;radar:{past:RadarFrame[]}};
 function mapHour(data:Record<string,unknown>,i:number):HourlyWeather {
- const at=(key:string,def=0)=>Number((data[key] as (number[]|undefined))?.[i] ?? def);
+ const at=(key:string,def=0)=>Number((data[key] as (number[]|undefined))?.[i]??def);
  return {time:String((data.time as string[])[i]),temperature:at("temperature_2m"),apparent:at("apparent_temperature"),precipitation:at("precipitation"),precipitationProbability:at("precipitation_probability"),humidity:at("relative_humidity_2m"),uv:at("uv_index"),wind:at("wind_speed_10m"),windDirection:at("wind_direction_10m"),pressure:at("surface_pressure"),visibility:at("visibility",10000)/1000,code:at("weather_code")};
 }
-async function loadWeather(latitude:number,longitude:number,signal:AbortSignal):Promise<WeatherPayload>{
- const params=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),timezone:"auto",forecast_days:"7",current:"temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m",hourly:"temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,uv_index,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,weather_code",daily:"sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code"});
- const response=await fetch(endpoint+"?"+params,{signal});
- if(!response.ok) throw new Error("Weather service is currently unavailable.");
- const raw=await response.json();
+function meanSeries(data:Record<string,unknown>,key:string):number[] {
+ const arrays=Object.entries(data).filter(([name,value])=>name===key||name.startsWith(key+"_member")||name.startsWith(key+"_gfs")||name.startsWith(key+"_ncep")).map(([,value])=>value).filter((value):value is number[]=>Array.isArray(value)) as number[][];
+ if(!arrays.length)return [];
+ const length=arrays[0].length;
+ return Array.from({length},(_,i)=>{const values=arrays.map(a=>a[i]).filter((v):v is number=>Number.isFinite(v));return values.length?values.reduce((a,b)=>a+b,0)/values.length:0;});
+}
+function inferredCode(snow:number,precip:number,hours:number,cloud:number,temp:number) {
+ if(snow>.05|| (temp<=0&&precip>.3))return 71;
+ if(precip>2||hours>4)return 雨Code(precip);
+ if(cloud>82)return 3;
+ if(cloud>38)return 2;
+ return 0;
+}
+function 雨Code(precip:number){return precip>8?65:61;}
+async function loadWeather(latitude:number,longitude:number,signal:AbortSignal):Promise<{payload:WeatherPayload;days:DailyWeather[]}>{
+ const params=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),timezone:"auto",forecast_days:"16",current:"temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m",hourly:"temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,uv_index,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,weather_code",daily:"sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,snowfall_sum,wind_speed_10m_max,cloud_cover_mean"});
+ const ensembleParams=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),timezone:"auto",models:"gfs05",forecast_days:"30",daily:"temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,cloud_cover_mean"});
+ const [response,extendedResponse]=await Promise.all([fetch(endpoint+"?"+params,{signal}),fetch(ensembleEndpoint+"?"+ensembleParams,{signal})]);
+ if(!response.ok)throw new Error("Weather service is currently unavailable.");
+ if(!extendedResponse.ok)throw new Error("The 30-day ensemble outlook is currently unavailable.");
+ const [raw,extended]=await Promise.all([response.json(),extendedResponse.json()]);
  const currentTime=String(raw.current.time);
  const hourly=(raw.hourly.time as string[]).map((_:string,i:number)=>mapHour(raw.hourly,i));
  const nextIndex=hourly.findIndex(h=>h.time>currentTime);
  const currentIndex=Math.max(0,nextIndex<0?hourly.length-1:nextIndex-1);
  const current={...hourly[currentIndex],temperature:Number(raw.current.temperature_2m),apparent:Number(raw.current.apparent_temperature),humidity:Number(raw.current.relative_humidity_2m),precipitation:Number(raw.current.precipitation),wind:Number(raw.current.wind_speed_10m),windDirection:Number(raw.current.wind_direction_10m),pressure:Number(raw.current.surface_pressure),code:Number(raw.current.weather_code)};
- return {latitude:raw.latitude,longitude:raw.longitude,timezone:raw.timezone,current,hourly,daily:(raw.daily.time as string[]).map((_date:string,i:number)=>({sunrise:raw.daily.sunrise[i],sunset:raw.daily.sunset[i],max:raw.daily.temperature_2m_max[i],min:raw.daily.temperature_2m_min[i],code:raw.daily.weather_code[i]}))};
+ const primary=(raw.daily.time as string[]).map((date:string,i:number)=>({date,sunrise:raw.daily.sunrise[i],sunset:raw.daily.sunset[i],max:Number(raw.daily.temperature_2m_max[i]),min:Number(raw.daily.temperature_2m_min[i]),code:Number(raw.daily.weather_code[i]),precipitation:Number(raw.daily.precipitation_sum?.[i]??0),snowfall:Number(raw.daily.snowfall_sum?.[i]??0),wind:Number(raw.daily.wind_speed_10m_max?.[i]??0),cloud:Number(raw.daily.cloud_cover_mean?.[i]??0),confidence:"forecast" as const}));
+ const ext=extended.daily as Record<string,unknown>;
+ const dates=ext.time as string[];
+ const max=meanSeries(ext,"temperature_2m_max"),min=meanSeries(ext,"temperature_2m_min"),precip=meanSeries(ext,"precipitation_sum"),snow=meanSeries(ext,"snowfall_sum"),hours=meanSeries(ext,"precipitation_hours"),wind=meanSeries(ext,"wind_speed_10m_max"),cloud=meanSeries(ext,"cloud_cover_mean");
+ const near=primary.map(day=>({...day,confidence:"forecast" as const}));
+ const extendedDays=dates.map((date:string,i:number)=>{
+  const p=precip[i]??0,s=snow[i]??0,h=hours[i]??0,c=cloud[i]??0,t=max[i]??0;
+  return {date,sunrise:"",sunset:"",max:t,min:min[i]??t,code:inferredCode(s,p,h,c,t),precipitation:p,snowfall:s,wind:wind[i]??0,cloud:c,confidence:"ensemble" as const};
+ });
+ const merged=extendedDays.map(day=>near.find(item=>item.date===day.date)??day);
+ return {payload:{latitude:raw.latitude,longitude:raw.longitude,timezone:raw.timezone,current,hourly,daily:primary},days:merged};
 }
-function WeatherIcon({code}:{code:number}) { const kind=weatherKind(code); const Icon=kind==="rain"||kind==="storm"?CloudRain:kind==="snow"?CloudSnow:kind==="clear"?Sun:kind==="cloudy"?CloudSun:Cloud; return <Icon size={17} strokeWidth={1.5}/>; }
-
-type WeatherFilter = "all" | "sun" | "clouds" | "rain" | "snow" | "storm";
-
-export function WeatherLab({onBack,onGraphClick}:{onBack:()=>void;onGraphClick:()=>void}) {
- const [position,setPosition]=useState({latitude:fallback.latitude,longitude:fallback.longitude,label:fallback.label});
- const [payload,setPayload]=useState<WeatherPayload|null>(null);
- const [selected,setSelected]=useState(0);
- const [loading,setLoading]=useState(true);
- const [error,setError]=useState("");
- const [locationNote,setLocationNote]=useState("Using Munich as a starting point");
- const [reload,setReload]=useState(0);
- const [weatherFilter,setWeatherFilter]=useState<WeatherFilter>("all");
- useEffect(()=>{
-  const controller=new AbortController();setLoading(true);setError("");
-  loadWeather(position.latitude,position.longitude,controller.signal).then(result=>{
-   setPayload(result);const today=result.hourly.filter(h=>h.time.slice(0,10)===result.current.time.slice(0,10));
-   const index=today.findIndex(h=>h.time===result.current.time);
-   setSelected(index>=0?index:0);
-  }).catch(cause=>{if(!controller.signal.aborted)setError(cause instanceof Error?cause.message:"Unable to load weather.");})
-   .finally(()=>{if(!controller.signal.aborted)setLoading(false);});
-  return()=>controller.abort();
- },[position.latitude,position.longitude,reload]);
- useEffect(()=>{
-  if(!navigator.geolocation)return;
-  navigator.geolocation.getCurrentPosition(({coords})=>{
-   setPosition({latitude:coords.latitude,longitude:coords.longitude,label:"Your location"});
-   setLocationNote("Using your current location");
-  },()=>setLocationNote("Location permission unavailable — showing Munich"),{enableHighAccuracy:false,timeout:8000,maximumAge:300000});
- },[]);
- const locate=()=>{
-  if(!navigator.geolocation){setLocationNote("Geolocation is not supported by this browser");return;}
-  navigator.geolocation.getCurrentPosition(({coords})=>{
-   setPosition({latitude:coords.latitude,longitude:coords.longitude,label:"Your location"});setLocationNote("Using your current location");
-  },()=>setLocationNote("Location unavailable — showing Munich"),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
- };
- const todayKey=payload?.current.time.slice(0,10);
- const todayHours=useMemo(()=>payload?.hourly.filter(hour=>hour.time.slice(0,10)===todayKey)??[],[payload?.hourly,todayKey]);
- const selectedIndex=Math.min(selected,Math.max(0,todayHours.length-1));
- const active=todayHours[selectedIndex]??payload?.current;
- const selectedHour=active?Number(active.time.slice(11,13)):12;
- const daily=payload?.daily??[];
+function WeatherIcon({code}:{code:number}){const kind=weatherKind(code);const Icon=kind==="rain"||kind==="storm"?CloudRain:kind==="snow"?CloudSnow:kind==="clear"?Sun:kind==="cloudy"?CloudSun:Cloud;return <Icon size={18} strokeWidth={1.5}/>;}
+function dayName(date:string){return new Intl.DateTimeFormat(undefined,{weekday:"short",day:"numeric",month:"short"}).format(new Date(date+"T12:00:00"));}
+function tileXY(lat:number,lon:number,z:number){const n=2**z;const x=Math.floor((lon+180)/360*n);const latRad=lat*Math.PI/180;const y=Math.floor((1-Math.asinh(Math.tan(latRad))/Math.PI)/2*n);return {x,y};}
+function RadarView({latitude,longitude}:{latitude:number;longitude:number}){
+ const [manifest,setManifest]=useState<RadarManifest|null>(null),[frame,setFrame]=useState(0),[zoom,setZoom]=useState(5),[playing,setPlaying]=useState(false),[failed,setFailed]=useState(false);
+ useEffect(()=>{const controller=new AbortController();fetch("https://api.rainviewer.com/public/weather-maps.json",{signal:controller.signal}).then(r=>{if(!r.ok)throw new Error("Radar unavailable");return r.json();}).then(data=>{setManifest(data);setFrame(Math.max(0,data.radar.past.length-1));}).catch(()=>{if(!controller.signal.aborted)setFailed(true);});return()=>controller.abort();},[]);
+ useEffect(()=>{if(!playing||!manifest)return;const timer=window.setInterval(()=>setFrame(v=>(v+1)%manifest.radar.past.length),850);return()=>window.clearInterval(timer);},[playing,manifest]);
+ const frames=manifest?.radar.past??[],selected=frames[frame],center=tileXY(latitude,longitude,zoom);
+ const tiles=Array.from({length:9},(_,i)=>({x:center.x+i%3-1,y:center.y+Math.floor(i/3)-1}));
+ return <div className="radar-panel">
+  <div className="radar-toolbar"><div><span className="radar-live-dot"/> LIVE RADAR · LAST 2 HOURS</div><div className="radar-actions"><button onClick={()=>setZoom(v=>Math.max(3,v-1))} aria-label="Zoom out">−</button><span>ZOOM {zoom}</span><button onClick={()=>setZoom(v=>Math.min(7,v+1))} aria-label="Zoom in">+</button></div></div>
+  <div className="radar-map"><div className="radar-tiles">{tiles.map((tile,i)=>{const valid=tile.y>=0&&tile.y<2**zoom;const base="https://tile.openstreetmap.org/"+zoom+"/"+((tile.x%(2**zoom)+(2**zoom))%(2**zoom))+"/"+tile.y+".png";const overlay=selected&&manifest?manifest.host+selected.path+"/256/"+zoom+"/"+((tile.x%(2**zoom)+(2**zoom))%(2**zoom))+"/"+tile.y+"/2/1_0.png":"";return <div className="radar-tile" key={i}>{valid&&<><img src={base} alt="" loading="lazy"/>{overlay&&<img className="radar-overlay" src={overlay} alt="" loading="lazy" onError={()=>setFailed(true)}/>}</>}</div>;})}</div><div className="radar-pin"><LocateFixed size={18}/><span>{fallback.label}</span></div>{failed&&<div className="radar-warning">Radar tiles temporarily unavailable. Map tiles may still load.</div>}</div>
+  <div className="radar-playback"><button onClick={()=>setPlaying(v=>!v)} aria-label={playing?"Pause radar":"Play radar"}>{playing?<Pause size={14}/>:<Play size={14}/>}</button><button onClick={()=>setFrame(v=>Math.max(0,v-1))} aria-label="Previous radar frame"><ChevronLeft size={14}/></button><input type="range" min="0" max={Math.max(0,frames.length-1)} value={frame} onChange={e=>setFrame(Number(e.target.value))}/><button onClick={()=>setFrame(v=>Math.min(frames.length-1,v+1))} aria-label="Next radar frame"><ChevronRight size={14}/></button><span>{selected?new Date(selected.time*1000).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"Loading radar…"}</span></div>
+  <p className="radar-attribution">Map © OpenStreetMap · Radar © <a href="https://www.rainviewer.com/" target="_blank" rel="noreferrer">RainViewer</a> · Past radar only</p>
+ </div>;
+}
+type WeatherFilter="all"|"sun"|"clouds"|"rain"|"snow"|"storm";
+export function WeatherLab({onBack,onGraphClick}:{onBack:()=>void;onGraphClick:()=>void}){
+ const [position,setPosition]=useState({...fallback}),[payload,setPayload]=useState<WeatherPayload|null>(null),[days,setDays]=useState<DailyWeather[]>([]),[selected,setSelected]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(""),[locationNote,setLocationNote]=useState("Using Munich as a starting point"),[reload,setReload]=useState(0),[weatherFilter,setWeatherFilter]=useState<WeatherFilter>("all"),[view,setView]=useState<"world"|"radar">("world"),[detail,setDetail]=useState<DailyWeather|null>(null),[compareMode,setCompareMode]=useState(false),[compare,setCompare]=useState<string[]>([]);
+ useEffect(()=>{const controller=new AbortController();setLoading(true);setError("");loadWeather(position.latitude,position.longitude,controller.signal).then(result=>{setPayload(result.payload);setDays(result.days);const today=result.payload.hourly.filter(h=>h.time.slice(0,10)===result.payload.current.time.slice(0,10));const index=today.findIndex(h=>h.time===result.payload.current.time);setSelected(index>=0?index:0);}).catch(cause=>{if(!controller.signal.aborted)setError(cause instanceof Error?cause.message:"Unable to load weather.");}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[position.latitude,position.longitude,reload]);
+ useEffect(()=>{if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(({coords})=>{setPosition({latitude:coords.latitude,longitude:coords.longitude,label:"Your location"});setLocationNote("Using your current location");},()=>setLocationNote("Location permission unavailable — showing Munich"),{enableHighAccuracy:false,timeout:8000,maximumAge:300000});},[]);
+ const locate=()=>{if(!navigator.geolocation){setLocationNote("Geolocation is not supported");return;}navigator.geolocation.getCurrentPosition(({coords})=>{setPosition({latitude:coords.latitude,longitude:coords.longitude,label:"Your location"});setLocationNote("Using your current location");},()=>setLocationNote("Location unavailable — showing Munich"),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});};
+ const todayKey=payload?.current.time.slice(0,10),todayHours=useMemo(()=>payload?.hourly.filter(hour=>hour.time.slice(0,10)===todayKey)??[],[payload?.hourly,todayKey]),selectedIndex=Math.min(selected,Math.max(0,todayHours.length-1)),active=todayHours[selectedIndex]??payload?.current,selectedHour=active?Number(active.time.slice(11,13)):12;
  const matchesFilter=(code:number)=>{const kind=weatherKind(code);if(weatherFilter==="all")return true;if(weatherFilter==="sun")return kind==="clear";if(weatherFilter==="clouds")return kind==="cloudy"||kind==="fog";return kind===weatherFilter;};
- const metrics=active?[
-  {label:"Feels like",value:Math.round(active.apparent)+"°",icon:Thermometer},
-  {label:"Precipitation",value:active.precipitation.toFixed(1)+" mm",icon:Droplets},
-  {label:"Rain chance",value:Math.round(active.precipitationProbability)+"%",icon:CloudRain},
-  {label:"UV index",value:active.uv.toFixed(1),icon:Sun},
-  {label:"Wind",value:Math.round(active.wind)+" km/h",icon:Wind},
-  {label:"Humidity",value:Math.round(active.humidity)+"%",icon:Droplets},
-  {label:"Pressure",value:Math.round(active.pressure)+" hPa",icon:Gauge},
-  {label:"Visibility",value:active.visibility.toFixed(1)+" km",icon:Compass}
- ]:[];
+ const metrics=active?[{label:"Feels like",value:Math.round(active.apparent)+"°",icon:Thermometer},{label:"Precipitation",value:active.precipitation.toFixed(1)+" mm",icon:Droplets},{label:"Rain chance",value:Math.round(active.precipitationProbability)+"%",icon:CloudRain},{label:"UV index",value:active.uv.toFixed(1),icon:Sun},{label:"Wind",value:Math.round(active.wind)+" km/h",icon:Wind},{label:"Humidity",value:Math.round(active.humidity)+"%",icon:Droplets},{label:"Pressure",value:Math.round(active.pressure)+" hPa",icon:Gauge},{label:"Visibility",value:active.visibility.toFixed(1)+" km",icon:Compass}]:[];
+ const toggleCompare=(date:string)=>setCompare(old=>old.includes(date)?old.filter(v=>v!==date):old.length<2?[...old,date]:[old[1],date]);
+ const compared=compare.map(date=>days.find(day=>day.date===date)).filter((day):day is DailyWeather=>Boolean(day));
  return <main className="visual-lab weather-lab">
   <header className="visual-topbar"><button className="back-link" onClick={onBack}><ArrowLeft size={15}/> Back to Visual Lab</button><div className="visual-top-meta"><span>VISUAL LAB</span><i/> EXPERIMENT 002</div></header>
   <div className="lab-switcher"><span>VISUAL LAB</span><button type="button" onClick={onGraphClick}>GRAPH VISUALIZER</button><span className="switch-active">WEATHER</span></div>
   <section className="visual-heading weather-heading"><div><p className="visual-eyebrow">ATMOSPHERIC EXPLORATION</p><h1>Weather <span>World</span></h1><p className="visual-subtitle">A living snapshot of the atmosphere around you.</p></div><button className="location-button" onClick={locate}><LocateFixed size={14}/> Use my location</button></section>
   <section className="weather-layout">
    <div className="weather-scene-panel">
-    <div className="weather-scene-meta"><span><i className="stage-dot"/> LIVE CONDITIONS</span><span>{position.label.toUpperCase()}</span></div>
-    <div className="weather-scene">
-     {active&&<WeatherScene weather={active} hour={selectedHour} />}
-     <div className="weather-hero-copy">
-      <span className="weather-hero-kicker">{active?weatherLabel(active.code).toUpperCase():"WEATHER LOADING"} · {active?formatHour(active.time):"—"}</span>
-      <strong>{active?Math.round(active.temperature)+"°":"—"}</strong>
-      <span className="weather-hero-feels">FEELS LIKE {active?Math.round(active.apparent)+"°":"—"}</span>
-     </div>
-     <div className="weather-hero-location">{position.label.toUpperCase()}<span>{active?.time===payload?.current.time?"LIVE CONDITIONS":"FORECAST EXPLORATION"}</span></div>
-     {loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}
-    </div>
+    <div className="weather-scene-meta"><span><i className="stage-dot"/> {view==="world"?"LIVING WEATHER WORLD":"PRECIPITATION RADAR"}</span><span>{position.label.toUpperCase()}</span></div>
+    <div className="weather-view-tabs"><button className={view==="world"?"active":""} onClick={()=>setView("world")}><Trees size={14}/> 3D WORLD</button><button className={view==="radar"?"active":""} onClick={()=>setView("radar")}><Map size={14}/> RADAR MAP</button></div>
+    {view==="world"?<div className="weather-scene">{active&&<WeatherScene weather={active} hour={selectedHour}/>}<div className="weather-hero-copy"><span className="weather-hero-kicker">{active?weatherLabel(active.code).toUpperCase():"WEATHER LOADING"} · {active?formatHour(active.time):"—"}</span><strong>{active?Math.round(active.temperature)+"°":"—"}</strong><span className="weather-hero-feels">FEELS LIKE {active?Math.round(active.apparent)+"°":"—"} · WIND {active?Math.round(active.wind)+" KM/H":"—"}</span></div><div className="weather-hero-location">{position.label.toUpperCase()}<span>{active?.time===payload?.current.time?"LIVE CONDITIONS":"FORECAST EXPLORATION"}</span></div>{loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}</div>:<RadarView latitude={position.latitude} longitude={position.longitude}/>}
    </div>
-   <aside className="weather-side">
-    <div className="weather-side-head"><span>ATMOSPHERIC DATA</span><button onClick={()=>setReload(value=>value+1)} aria-label="Refresh weather"><RefreshCw size={13}/></button></div>
-    <div className="weather-metrics">{metrics.map(({label,value,icon:Icon})=><div className="weather-metric" key={label}><Icon size={14}/><span>{label}</span><strong>{value}</strong></div>)}</div>
-    <div className="sun-cycle"><div><Sunrise size={15}/><span>Sunrise</span><strong>{daily[0]?.sunrise?formatHour(daily[0].sunrise):"—"}</strong></div><div><Sun size={15}/><span>Sunset</span><strong>{daily[0]?.sunset?formatHour(daily[0].sunset):"—"}</strong></div></div>
-   </aside>
+   <aside className="weather-side"><div className="weather-side-head"><span>ATMOSPHERIC DATA</span><button onClick={()=>setReload(v=>v+1)} aria-label="Refresh weather"><RefreshCw size={13}/></button></div><div className="weather-metrics">{metrics.map(({label,value,icon:Icon})=><div className="weather-metric" key={label}><Icon size={14}/><span>{label}</span><strong>{value}</strong></div>)}</div><div className="sun-cycle"><div><Sunrise size={15}/><span>Sunrise</span><strong>{days[0]?.sunrise?formatHour(days[0].sunrise):"—"}</strong></div><div><Sun size={15}/><span>Sunset</span><strong>{days[0]?.sunset?formatHour(days[0].sunset):"—"}</strong></div></div></aside>
   </section>
-  <section className="forecast-panel">
-   <div className="forecast-heading"><div><p className="visual-eyebrow">MOVE THROUGH TIME</p><h2>Hourly forecast</h2></div><span>DRAG TO EXPLORE · 24 HOURS</span></div>
+  <section className="forecast-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">MOVE THROUGH TIME</p><h2>Hourly forecast</h2></div><span>DRAG TO EXPLORE · TODAY</span></div>
    {todayHours.length>0&&<><div className="today-slider-head"><span>{formatHour(todayHours[0].time)} — {formatHour(todayHours[todayHours.length-1].time)}</span><strong>{formatHour(active?.time??todayHours[0].time)}</strong></div><input aria-label="Select hour of today" className="weather-timeline" type="range" min="0" max={todayHours.length-1} step="1" value={selectedIndex} onChange={e=>setSelected(Number(e.target.value))}/><div className="timeline-labels"><span>00:00</span><span>{todayHours.length} HOURS · TODAY ONLY</span><span>23:00</span></div><div className="hour-strip">{todayHours.map((h,i)=><button key={h.time} aria-pressed={i===selectedIndex} className={i===selectedIndex?"hour-card selected":"hour-card"} onClick={()=>setSelected(i)}><span>{formatHour(h.time)}</span><WeatherIcon code={h.code}/><strong>{Math.round(h.temperature)}°</strong><small>{Math.round(h.precipitationProbability)}%</small></button>)}</div></>}
   </section>
-  <section className="forecast-panel week-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">LOOK AHEAD</p><h2>Next 7 days</h2></div><span>DAILY OUTLOOK · HIGHLIGHT MATCHES</span></div>
-   <div className="weather-filters" role="group" aria-label="Highlight days by weather">
-    {([{id:"all",label:"All"},{id:"sun",label:"☀ Sun"},{id:"clouds",label:"☁ Clouds"},{id:"rain",label:"☂ Rain"},{id:"snow",label:"❄ Snow"},{id:"storm",label:"ϟ Storm"}] as {id:WeatherFilter;label:string}[]).map(filter=><button type="button" key={filter.id} aria-pressed={weatherFilter===filter.id} className={weatherFilter===filter.id?"active":""} onClick={()=>setWeatherFilter(filter.id)}>{filter.label}</button>)}
-   </div>
-   <div className="week-strip">{daily.map((d,i)=>{const match=matchesFilter(d.code);return <div className={"day-card "+(match?"filter-match":"filter-muted")} key={d.sunrise} title={weatherLabel(d.code)}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong><em>{weatherLabel(d.code)}</em></div>;})}</div></section>
-  {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
-  <p className="weather-attribution">WEATHER DATA BY OPEN-METEO · {locationNote.toUpperCase()} · UPDATES ON REFRESH</p>
+  <section className="forecast-panel week-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">LOOK AHEAD</p><h2>Next 30 days</h2></div><div className="forecast-actions"><span>ENSEMBLE OUTLOOK · LOWER CONFIDENCE WITH LEAD TIME</span><button className={compareMode?"active":""} onClick={()=>{setCompareMode(v=>!v);setCompare([]);}}><GitCompareArrows size={13}/> Compare days</button></div></div>
+   <div className="weather-filters" role="group" aria-label="Highlight days by weather">{([{id:"all",label:"All"},{id:"sun",label:"☀ Sun"},{id:"clouds",label:"☁ Clouds"},{id:"rain",label:"☂ Rain"},{id:"snow",label:"❄ Snow"},{id:"storm",label:"ϟ Storm"}] as {id:WeatherFilter;label:string}[]).map(filter=><button type="button" key={filter.id} aria-pressed={weatherFilter===filter.id} className={weatherFilter===filter.id?"active":""} onClick={()=>setWeatherFilter(filter.id)}>{filter.label}</button>)}</div>
+   {compareMode&&<p className="compare-hint">Select two days to compare ({compare.length}/2 selected).</p>}
+   <div className="month-strip">{days.map((d,i)=>{const match=matchesFilter(d.code),selectedCompare=compare.includes(d.date);return <button type="button" className={"day-card "+(match?"filter-match":"filter-muted")+(selectedCompare?" compare-selected":"")} key={d.date} onClick={()=>compareMode?toggleCompare(d.date):setDetail(d)} title={weatherLabel(d.code)}><span>{i===0?"Today":dayName(d.date)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong><em>{weatherLabel(d.code)}</em><small className="day-confidence">{d.confidence==="forecast"?"MODEL":"ENSEMBLE"}</small></button>;})}</div>
+   {compared.length===2&&<div className="compare-panel"><div className="compare-heading">DAY COMPARISON <button onClick={()=>setCompare([])}><X size={13}/> Clear</button></div><div className="compare-grid">{compared.map(d=><div key={d.date}><strong>{dayName(d.date)}</strong><WeatherIcon code={d.code}/><b>{Math.round(d.max)}° / {Math.round(d.min)}°</b><span>{weatherLabel(d.code)}</span><span>{d.precipitation.toFixed(1)} mm precipitation</span><span>{Math.round(d.wind)} km/h max wind</span></div>)}</div></div>}
+  </section>
+  <section className="weather-bottom-grid"><div className="weather-info-card"><Waves size={17}/><div><strong>Forecast confidence</strong><p>Days 1–16 use the standard forecast blend. Days 17–30 use a 50 km GFS ensemble outlook; detail decreases with lead time.</p></div></div><div className="weather-info-card"><CalendarDays size={17}/><div><strong>Plan with context</strong><p>Tap any day for precipitation, wind, cloud cover and temperature details. Compare any two dates.</p></div></div></section>
+  {detail&&<div className="weather-modal-backdrop" role="presentation" onClick={()=>setDetail(null)}><section className="weather-day-modal" role="dialog" aria-modal="true" aria-label={dayName(detail.date)+" forecast"} onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={()=>setDetail(null)} aria-label="Close"><X size={17}/></button><p className="visual-eyebrow">DAILY FORECAST · {detail.confidence==="forecast"?"MODEL BLEND":"ENSEMBLE OUTLOOK"}</p><h2>{dayName(detail.date)}</h2><div className="modal-condition"><WeatherIcon code={detail.code}/><span>{weatherLabel(detail.code)}</span></div><div className="modal-temps"><strong>{Math.round(detail.max)}°</strong><span>{Math.round(detail.min)}° low</span></div><div className="modal-metrics"><div><Droplets size={15}/>Precipitation<strong>{detail.precipitation.toFixed(1)} mm</strong></div><div><Wind size={15}/>Max wind<strong>{Math.round(detail.wind)} km/h</strong></div><div><Cloud size={15}/>Cloud cover<strong>{Math.round(detail.cloud)}%</strong></div><div><CloudSnow size={15}/>Snowfall<strong>{detail.snowfall.toFixed(1)} cm</strong></div></div><p className="modal-note">{detail.confidence==="forecast"?"Higher-detail operational forecast.":"Extended ensemble estimate. Treat this as a broad trend, not a precise day-specific prediction."}</p><button className="modal-compare" onClick={()=>{toggleCompare(detail.date);setCompareMode(true);setDetail(null);}}><GitCompareArrows size={14}/> Add to comparison</button></section></div>}
+  {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>setReload(v=>v+1)}>Try again</button></p>}
+  <p className="weather-attribution">WEATHER DATA BY OPEN-METEO · RADAR BY RAINVIEWER · {locationNote.toUpperCase()} · UPDATES ON REFRESH</p>
  </main>;
 }
