@@ -34,7 +34,8 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
  useEffect(()=>{
   const controller=new AbortController();setLoading(true);setError("");
   loadWeather(position.latitude,position.longitude,controller.signal).then(result=>{
-   setPayload(result);const index=Math.max(0,result.hourly.findIndex(h=>h.time===result.current.time));
+   setPayload(result);const today=result.hourly.filter(h=>h.time.slice(0,10)===result.current.time.slice(0,10));
+   const index=today.findIndex(h=>h.time===result.current.time);
    setSelected(index>=0?index:0);
   }).catch(cause=>{if(!controller.signal.aborted)setError(cause instanceof Error?cause.message:"Unable to load weather.");})
    .finally(()=>{if(!controller.signal.aborted)setLoading(false);});
@@ -53,10 +54,11 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
    setPosition({latitude:coords.latitude,longitude:coords.longitude,label:"Your location"});setLocationNote("Using your current location");
   },()=>setLocationNote("Location unavailable — showing Munich"),{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
  };
- const hours=payload?.hourly??[];
- const visible=useMemo(()=>hours.slice(selected,selected+24),[hours,selected]);
- const active=hours[selected]??payload?.current;
- const selectedHour=active?new Date(active.time).getHours():12;
+ const todayKey=payload?.current.time.slice(0,10);
+ const todayHours=useMemo(()=>payload?.hourly.filter(hour=>hour.time.slice(0,10)===todayKey)??[],[payload?.hourly,todayKey]);
+ const selectedIndex=Math.min(selected,Math.max(0,todayHours.length-1));
+ const active=todayHours[selectedIndex]??payload?.current;
+ const selectedHour=active?Number(active.time.slice(11,13)):12;
  const daily=payload?.daily??[];
  const metrics=active?[
   {label:"Feels like",value:Math.round(active.apparent)+"°",icon:Thermometer},
@@ -82,7 +84,7 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
       <strong>{active?Math.round(active.temperature)+"°":"—"}</strong>
       <span className="weather-hero-feels">FEELS LIKE {active?Math.round(active.apparent)+"°":"—"}</span>
      </div>
-     <div className="weather-hero-location">{position.label.toUpperCase()}<span>{selected===0?"LIVE CONDITIONS":"FORECAST EXPLORATION"}</span></div>
+     <div className="weather-hero-location">{position.label.toUpperCase()}<span>{active?.time===payload?.current.time?"LIVE CONDITIONS":"FORECAST EXPLORATION"}</span></div>
      {loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}
     </div>
    </div>
@@ -94,7 +96,7 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
   </section>
   <section className="forecast-panel">
    <div className="forecast-heading"><div><p className="visual-eyebrow">MOVE THROUGH TIME</p><h2>Hourly forecast</h2></div><span>DRAG TO EXPLORE · 24 HOURS</span></div>
-   {hours.length>0&&<><input aria-label="Select forecast hour" className="weather-timeline" type="range" min="0" max={Math.max(0,hours.length-1)} value={selected} onChange={e=>setSelected(Number(e.target.value))}/><div className="timeline-labels"><span>{formatHour(hours[0].time)}</span><span>SELECTED</span><span>{formatDay(hours[Math.min(hours.length-1,selected+23)].time)}</span></div><div className="hour-strip">{visible.map((h,i)=><button key={h.time} className={i===0?"hour-card selected":"hour-card"} onClick={()=>setSelected(selected+i)}><span>{formatHour(h.time)}</span><WeatherIcon code={h.code}/><strong>{Math.round(h.temperature)}°</strong><small>{Math.round(h.precipitationProbability)}%</small></button>)}</div></>}
+   {todayHours.length>0&&<><div className="today-slider-head"><span>{formatHour(todayHours[0].time)} — {formatHour(todayHours[todayHours.length-1].time)}</span><strong>{formatHour(active?.time??todayHours[0].time)}</strong></div><input aria-label="Select hour of today" className="weather-timeline" type="range" min="0" max={todayHours.length-1} step="1" value={selectedIndex} onChange={e=>setSelected(Number(e.target.value))}/><div className="timeline-labels"><span>00:00</span><span>{todayHours.length} HOURS · TODAY ONLY</span><span>23:00</span></div><div className="hour-strip">{todayHours.map((h,i)=><button key={h.time} aria-pressed={i===selectedIndex} className={i===selectedIndex?"hour-card selected":"hour-card"} onClick={()=>setSelected(i)}><span>{formatHour(h.time)}</span><WeatherIcon code={h.code}/><strong>{Math.round(h.temperature)}°</strong><small>{Math.round(h.precipitationProbability)}%</small></button>)}</div></>}
   </section>
   <section className="forecast-panel week-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">LOOK AHEAD</p><h2>Next 7 days</h2></div><span>DAILY OUTLOOK</span></div><div className="week-strip">{daily.map((d,i)=><div className="day-card" key={d.sunrise}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong></div>)}</div></section>
   {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
