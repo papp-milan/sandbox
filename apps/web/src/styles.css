@@ -1190,3 +1190,5 @@ a {
 @media(prefers-reduced-motion:reduce) {
  .game-result-overlay,.game-result-card { animation:none; }
 }
+
+.legend-ship { background:#819598; box-shadow:inset 0 0 0 2px #46575a; }.legend-sunk { background:#713e43; box-shadow:0 0 7px rgba(193,122,122,.65); }
