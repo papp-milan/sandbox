@@ -25,9 +25,9 @@ function SeasonalTree({position,scale,season}:{position:[number,number,number];s
  useFrame(({clock})=>{if(crown.current){crown.current.rotation.z=Math.sin(clock.elapsedTime*.8+position[0])* (season==="winter"?.012:.035);crown.current.rotation.x=Math.sin(clock.elapsedTime*.55+position[2])*.018;}});
  const conifer=position[0]===-7||position[0]===7||Math.abs(position[2])>3.8;
  return <group position={position} scale={scale}>
-  <mesh position={[0,.72,0]}><cylinderGeometry args={[.09,.17,1.45,7]}/><meshStandardMaterial color={season==="winter"?"#554d47":"#574333"} roughness={1}/></mesh>
+  <mesh castShadow position={[0,.72,0]}><cylinderGeometry args={[.09,.17,1.45,7]}/><meshStandardMaterial color={season==="winter"?"#554d47":"#574333"} roughness={1}/></mesh>
   <group ref={crown} position={[0,1.45,0]}>
-   {conifer?<>{[0,.55,1.08].map((y,i)=><mesh key={i} position={[0,y,0]}><coneGeometry args={[.72-i*.13,1.25,9]}/><meshStandardMaterial color={season==="winter"?(i===2?"#f2f7f8":"#31545a"):season==="autumn"?"#536b42":palette.foliage} roughness={.94}/></mesh>)}
+   {conifer?<>{[0,.55,1.08].map((y,i)=><mesh castShadow key={i} position={[0,y,0]}><coneGeometry args={[.72-i*.13,1.25,9]}/><meshStandardMaterial color={season==="winter"?(i===2?"#f2f7f8":"#31545a"):season==="autumn"?"#536b42":palette.foliage} roughness={.94}/></mesh>)}
     {season==="winter"&&<mesh position={[0,1.7,0]}><coneGeometry args={[.2,.48,8]}/><meshStandardMaterial color="#f5fbff"/></mesh>}
    </>:<>{[[0,.35,0],[.42,.65,.12],[-.42,.62,.08],[0,.95,-.12],[.25,1.1,-.2]].map(([x,y,z],i)=><mesh key={i} position={[x,y,z]} scale={i===0?1:.78}><icosahedronGeometry args={[.64,2]}/><meshStandardMaterial color={season==="winter"?"#d8e8ef":i%2?palette.foliage2:palette.foliage} roughness={.88}/></mesh>)}
     {season==="spring"&&[[-.4,.8,.35],[.38,.95,.2],[0,1.3,-.25]].map(([x,y,z],i)=><mesh key={i} position={[x,y,z]}><icosahedronGeometry args={[.22,1]}/><meshStandardMaterial color="#f7c6d8" emissive="#ed9ebd" emissiveIntensity={.12}/></mesh>)}
@@ -52,8 +52,8 @@ function Cloud({position,scale=1,storm=false,form="cumulus"}:{position:[number,n
 }
 function Cabin({season}:{season:Season}){
  return <group position={[2.3,-1.85,-2.2]} scale={.72}>
-  <mesh position={[0,.55,0]}><boxGeometry args={[1.5,1.1,1.15]}/><meshStandardMaterial color={season==="winter"?"#574c46":"#78533b"}/></mesh>
-  <mesh position={[0,1.27,0]} rotation={[0,Math.PI/4,0]}><coneGeometry args={[1.12,.85,4]}/><meshStandardMaterial color={season==="winter"?"#edf5f8":season==="autumn"?"#603e35":"#55443a"}/></mesh>
+  <mesh castShadow position={[0,.55,0]}><boxGeometry args={[1.5,1.1,1.15]}/><meshStandardMaterial color={season==="winter"?"#574c46":"#78533b"}/></mesh>
+  <mesh castShadow position={[0,1.27,0]} rotation={[0,Math.PI/4,0]}><coneGeometry args={[1.12,.85,4]}/><meshStandardMaterial color={season==="winter"?"#edf5f8":season==="autumn"?"#603e35":"#55443a"}/></mesh>
   <mesh position={[.28,.56,.59]}><planeGeometry args={[.27,.38]}/><meshStandardMaterial color="#ffd58a" emissive="#ffb65e" emissiveIntensity={season==="winter"?1.6:.55}/></mesh>
   <mesh position={[-.42,.56,.59]}><planeGeometry args={[.24,.34]}/><meshStandardMaterial color="#ffd58a" emissive="#ffb65e" emissiveIntensity={season==="winter"?1.6:.55}/></mesh>
   <mesh position={[0,.56,.6]}><boxGeometry args={[.18,.9,.12]}/><meshStandardMaterial color="#49362b"/></mesh>
@@ -98,8 +98,8 @@ function TerrainDetails({season}:{season:Season}){
    <mesh position={[-.5,-2.08,-1.3]} rotation={[-Math.PI/2,0,0]} scale={[3.75,1.22,1]}><circleGeometry args={[1,64]}/><meshStandardMaterial color={palette.water} roughness={.2} metalness={.16} transparent opacity={.96}/></mesh>
    {Array.from({length:5},(_,i)=><mesh key={i} position={[-.5+(i-2)*.95,-2.055,-1.45+Math.sin(i)*.24]} rotation={[-Math.PI/2,0,0]} scale={[.38,.035,1]}><circleGeometry args={[1,24]}/><meshBasicMaterial color="#d7f0ed" transparent opacity={.18}/></mesh>)}
   </group>
-  {rocks.map((r,i)=><mesh key={"rock"+i} position={[r.x,-2.03+r.s*.28,r.z]} rotation={[r.rot*.1,r.rot,r.rot*.17]} scale={[r.s*1.35,r.s,r.s*.9]}><dodecahedronGeometry args={[1,0]}/><meshStandardMaterial color={rockColor} roughness={1}/></mesh>)}
-  {shrubs.map((b,i)=><group key={"shrub"+i} position={[b.x,-1.98,b.z]} scale={b.s}><mesh position={[0,.22,0]}><icosahedronGeometry args={[.65,1]}/><meshStandardMaterial color={palette.foliage} roughness={1}/></mesh><mesh position={[.32,.16,.08]}><icosahedronGeometry args={[.43,1]}/><meshStandardMaterial color={palette.foliage2} roughness={1}/></mesh></group>)}
+  {rocks.map((r,i)=><mesh castShadow receiveShadow key={"rock"+i} position={[r.x,-2.03+r.s*.28,r.z]} rotation={[r.rot*.1,r.rot,r.rot*.17]} scale={[r.s*1.35,r.s,r.s*.9]}><dodecahedronGeometry args={[1,0]}/><meshStandardMaterial color={rockColor} roughness={.92} bumpMap={groundBump} bumpScale={.035}/></mesh>)}
+  {shrubs.map((b,i)=><group key={"shrub"+i} position={[b.x,-1.98,b.z]} scale={b.s}><mesh position={[0,.22,0]}><icosahedronGeometry args={[.65,1]}/><meshStandardMaterial color={palette.foliage} roughness={.94} bumpMap={groundBump} bumpScale={.018}/></mesh><mesh position={[.32,.16,.08]}><icosahedronGeometry args={[.43,1]}/><meshStandardMaterial color={palette.foliage2} roughness={1}/></mesh></group>)}
   {grass.map((g,i)=><group key={"grass"+i} position={[g.x,-1.98,g.z]} rotation={[0,g.r,0]}>{[0,1,2].map(j=><mesh key={j} position={[(j-1)*.09,.18,0]} rotation={[0,0,(j-1)*-.22]}><coneGeometry args={[.055,.42,5]}/><meshStandardMaterial color={season==="winter"?"#dce8eb":palette.foliage2} roughness={1}/></mesh>)}</group>)}
   {path.map((p,i)=><mesh key={"path"+i} position={[p.x,-2.015,p.z]} rotation={[-Math.PI/2,0,(i%2)*.12]} scale={[p.s*1.5,p.s*.7,.04]}><circleGeometry args={[1,8]}/><meshStandardMaterial color={pathColor} roughness={1}/></mesh>)}
   {[-6.7,-5.9,-5.1,5.1,5.9,6.7].map((x,i)=><group key={"flower"+i} position={[x,-1.97,2.8+(i%2)*.25]}><mesh position={[0,.18,0]}><cylinderGeometry args={[.012,.018,.36,5]}/><meshStandardMaterial color="#477344"/></mesh><mesh position={[0,.38,0]}><sphereGeometry args={[.105,10,8]}/><meshStandardMaterial color={season==="spring"?"#f5bfd4":season==="summer"?"#f2d16e":season==="autumn"?"#d77b37":"#f4f7f8"}/></mesh></group>)}
@@ -159,6 +159,20 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
  const ground=useRef<THREE.Mesh>(null),water=useRef<THREE.Mesh>(null),flash=useRef<THREE.PointLight>(null),sun=useRef<THREE.Group>(null),intro=useRef(0),clouds=useRef<THREE.Group>(null);
  const targetSky=new THREE.Color(storm?"#26364d":foggy?"#aab8bd":kind==="cloudy"?"#91aab5":night?"#101d37":golden?theme.horizon:theme.sky);
  const targetGround=new THREE.Color(theme.ground);
+ const groundBump=useMemo(()=>{
+  const size=128,data=new Uint8Array(size*size*4);
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+   const i=(y*size+x)*4;
+   const wave=Math.sin(x*.31+Math.sin(y*.17)*2.4)*Math.cos(y*.27+x*.08);
+   const grain=Math.sin(x*1.73+y*2.31)*Math.cos(y*1.19-x*.93);
+   const value=Math.max(0,Math.min(255,128+wave*24+grain*12));
+   data[i]=data[i+1]=data[i+2]=value;data[i+3]=255;
+  }
+  const texture=new THREE.DataTexture(data,size,size,THREE.RGBAFormat);
+  texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(34,34);
+  texture.minFilter=THREE.LinearMipmapLinearFilter;texture.magFilter=THREE.LinearFilter;texture.generateMipmaps=true;texture.needsUpdate=true;
+  return texture;
+ },[]);
  useFrame((state,delta)=>{
   intro.current=Math.min(1,intro.current+delta*.22);const reveal=THREE.MathUtils.smoothstep(intro.current,0,1);
   state.camera.position.lerp(new THREE.Vector3(0,2.2+(1-reveal)*3,12.4+(1-reveal)*7),1-Math.exp(-delta*1.25));state.camera.lookAt(0,-.2,0);
@@ -172,7 +186,7 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
  });
  return <>
   <color attach="background" args={[foggy?"#aab8bd":kind==="cloudy"?"#91aab5":theme.sky]}/><fog attach="fog" args={[foggy?"#aab8bd":kind==="cloudy"?"#91aab5":theme.sky,foggy?2.5:38,foggy?15:100]}/>
-  <ambientLight intensity={night?.48:golden?1.1:1.35}/><directionalLight position={[-5,9,5]} intensity={night?.45:golden?2.0:2.4} color={golden?"#ffd2a0":season==="winter"?"#d9edff":"#fff2d8"}/><directionalLight position={[5,4,-4]} intensity={.65} color="#c9e5ff"/>
+  <ambientLight intensity={night?.38:golden?.72:.82}/><directionalLight castShadow position={[-5,10,6]} intensity={night?.55:golden?2.15:2.7} color={golden?"#ffd2a0":season==="winter"?"#d9edff":"#fff2d8"} shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-left={-15} shadow-camera-right={15} shadow-camera-top={12} shadow-camera-bottom={-10} shadow-bias={-0.00018}/><directionalLight position={[5,4,-4]} intensity={.48} color="#c9e5ff"/>
   {night&&<Stars radius={65} depth={45} count={1700} factor={2} fade speed={.35}/>}
   {!night&&<group ref={sun}><mesh><sphereGeometry args={[.72,32,32]}/><meshStandardMaterial color="#ffe4a5" emissive="#ffb75b" emissiveIntensity={1.8}/></mesh><mesh><sphereGeometry args={[1.5,24,24]}/><meshBasicMaterial color="#ffd18a" transparent opacity={.12}/></mesh></group>}
   {night&&<mesh position={[-4,4,-5]}><sphereGeometry args={[.48,32,24]}/><meshStandardMaterial color="#e7f0ff" emissive="#b8d5ff" emissiveIntensity={1.2}/></mesh>}
@@ -184,8 +198,8 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
    <Cloud position={[6.1,4.15,-6]} scale={storm?1.1:.95} storm={storm} form="cirrus"/>
   </group>}
   {!night&&<BirdFlock weather={weather}/>}
-  <mesh ref={ground} rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={1}/></mesh>
-  <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,96,48]}/><meshStandardMaterial color={theme.water} roughness={.12} metalness={.22} transparent opacity={.94}/></mesh>
+  <mesh ref={ground} receiveShadow rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={.96} bumpMap={groundBump} bumpScale={.075}/></mesh>
+  <mesh ref={water} receiveShadow rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,96,48]}/><meshStandardMaterial color={theme.water} roughness={.18} metalness={.28} transparent opacity={.97}/></mesh>
   <WaterRipples/>
   <TerrainDetails season={season}/>
   <WorldLandmarks season={season}/>
@@ -199,5 +213,5 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
  </>;
 }
 export function WeatherScene({weather,hour,latitude=48.1372,seasonOverride}:{weather:HourlyWeather;hour:number;latitude?:number;seasonOverride?:Season}){
- return <Canvas dpr={[1,1.5]} camera={{position:[0,4,19],fov:42}} gl={{antialias:true,alpha:false}}><LivingWorld weather={weather} hour={hour} latitude={latitude} seasonOverride={seasonOverride}/></Canvas>;
+ return <Canvas shadows dpr={[1,1.5]} camera={{position:[0,4,19],fov:42}} gl={{antialias:true,alpha:false}}><LivingWorld weather={weather} hour={hour} latitude={latitude} seasonOverride={seasonOverride}/></Canvas>;
 }
