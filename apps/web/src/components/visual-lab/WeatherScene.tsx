@@ -111,6 +111,45 @@ function TerrainDetails({season}:{season:Season}){
  </>;
 }
 
+function WaterRipples(){
+ const rings=useRef<THREE.Group>(null);
+ useFrame(({clock})=>{
+  if(!rings.current)return;
+  const t=clock.elapsedTime;
+  rings.current.children.forEach((child,i)=>{
+   const phase=(t*.22+i*.19)%1;
+   child.scale.setScalar(.45+phase*.9);
+   const material=(child as THREE.Mesh).material as THREE.MeshBasicMaterial;
+   material.opacity=(1-phase)*.24;
+   child.position.x=Math.sin(t*.22+i*2.1)*.8+(i%3-1)*.65;
+   child.position.z=Math.cos(t*.18+i*1.3)*.35+(Math.floor(i/3)-1)*.22;
+  });
+ });
+ return <group ref={rings} position={[-.5,-1.965,-1.3]}>
+  {Array.from({length:8},(_,i)=><mesh key={i} rotation={[-Math.PI/2,0,0]} position={[(i%3-1)*.65,0,(Math.floor(i/3)-1)*.22]}>
+   <torusGeometry args={[.22,.012,5,36]}/>
+   <meshBasicMaterial color="#e7ffff" transparent opacity={.18} depthWrite={false}/>
+  </mesh>)}
+ </group>;
+}
+function BirdFlock({weather}:{weather:HourlyWeather}){
+ const flock=useRef<THREE.Group>(null);
+ const wings=useRef<THREE.Group[]>([]);
+ useFrame(({clock})=>{
+  if(flock.current){const t=clock.elapsedTime;flock.current.position.x=-10+(t*.48%22);flock.current.position.y=3.9+Math.sin(t*.7)*.18;flock.current.position.z=-5;}
+  wings.current.forEach((wing,i)=>{if(wing)wing.rotation.z=Math.sin(clock.elapsedTime*7+i)*.24;});
+ });
+ if(weatherKind(weather.code)==="fog"||weatherKind(weather.code)==="storm"||weatherKind(weather.code)==="rain")return null;
+ return <group ref={flock}>
+  {Array.from({length:4},(_,i)=><group key={i} position={[i*.48,Math.sin(i*2)*.18,-i*.12]} scale={.16+i*.012}>
+   <mesh><sphereGeometry args={[.18,8,6]}/><meshStandardMaterial color="#33434a" roughness={1}/></mesh>
+   <group ref={el=>{if(el)wings.current[i]=el;}} position={[0,.06,0]}>
+    <mesh position={[-.22,0,0]} rotation={[0,0,-.42]}><capsuleGeometry args={[.035,.32,2,5]}/><meshStandardMaterial color="#33434a"/></mesh>
+    <mesh position={[.22,0,0]} rotation={[0,0,.42]}><capsuleGeometry args={[.035,.32,2,5]}/><meshStandardMaterial color="#33434a"/></mesh>
+   </group>
+  </group>)}
+ </group>;
+}
 function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeather;hour:number;latitude:number;seasonOverride?:Season}){
  const season=seasonOverride??getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",foggy=kind==="fog",cloudy=kind!=="clear"&&!foggy,golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
  const ground=useRef<THREE.Mesh>(null),water=useRef<THREE.Mesh>(null),flash=useRef<THREE.PointLight>(null),sun=useRef<THREE.Group>(null),intro=useRef(0),clouds=useRef<THREE.Group>(null);
@@ -136,8 +175,10 @@ function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeath
   <group position={[0,0,-5]}><Mountain position={[-7,-.1,0]} scale={[3.3,2.8,1]} season={season}/><Mountain position={[-3.7,.1,-.6]} scale={[3.8,3.5,1]} season={season}/><Mountain position={[.2,-.1,-.9]} scale={[4.5,3.7,1]} season={season}/><Mountain position={[5,-.05,-.5]} scale={[3.6,3.2,1]} season={season}/><Mountain position={[8,-.1,0]} scale={[3,2.7,1]} season={season}/></group>
   {foggy&&<FogBanks/>}
   {cloudy&&<group ref={clouds}><Cloud position={[-4,3,-3]} scale={storm?1.6:1.2} storm={storm}/><Cloud position={[1.5,3.7,-4]} scale={storm?1.8:1.1} storm={storm}/><Cloud position={[6,2.9,-3]} scale={.9} storm={storm}/></group>}
+  {!night&&<BirdFlock weather={weather}/>}
   <mesh ref={ground} rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={1}/></mesh>
   <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,96,48]}/><meshStandardMaterial color={theme.water} roughness={.12} metalness={.22} transparent opacity={.94}/></mesh>
+  <WaterRipples/>
   <TerrainDetails season={season}/>
   <WorldLandmarks season={season}/>
   {treePositions.map(([x,y,z,s],i)=><SeasonalTree key={i} position={[x,y,z]} scale={s} season={season}/>)}
