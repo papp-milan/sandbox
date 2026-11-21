@@ -69,7 +69,7 @@ function WeatherParticles({weather,season}:{weather:HourlyWeather;season:Season}
 
 function FogBanks(){
  const ref=useRef<THREE.Group>(null);
- useFrame(({clock},delta)=>{if(ref.current){ref.current.position.x=Math.sin(clock.elapsedTime*.035)*.65;ref.current.children.forEach((child,i)=>{child.position.z=-5+i*1.5;});}});
+ useFrame(({clock})=>{if(ref.current){ref.current.position.x=Math.sin(clock.elapsedTime*.035)*.65;ref.current.children.forEach((child,i)=>{child.position.z=-5+i*1.5;});}});
  return <group ref={ref}>
   {[-1.9,-.95,-.15].map((y,i)=><group key={i} position={[0,y,-5+i*1.5]}>
    {[-8,-5,-2,1,4,7].map((x,j)=><mesh key={j} position={[x+(i%2)*1.3,Math.sin(j*1.7+i)*.22,0]} scale={[2.8+i*.25,.42+i*.12,.65]}><sphereGeometry args={[1,20,12]}/><meshBasicMaterial color={i===2?"#e8f0f1":"#f4f7f6"} transparent opacity={.12+i*.025} depthWrite={false}/></mesh>)}
