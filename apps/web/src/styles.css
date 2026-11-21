@@ -1353,3 +1353,41 @@ a {
   .games-lab.battle-impact,.games-lab.battle-impact::after,
   .ocean-grid button.revealed-ship,.own-fleet-grid button.ship-cell.sunk { animation:none; }
 }
+
+
+/* Tic-Tac-Toe: fixed square play area regardless of selected marks. */
+.tic-board {
+  width: min(100%, 560px);
+  aspect-ratio: 1 / 1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+.tic-board button { min-width:0; min-height:0; aspect-ratio:1 / 1; }
+
+/* Rock Paper Scissors: animated head-to-head clash and score attribution. */
+.rps-score-side { min-width:72px; }
+.rps-score-dots { display:flex; justify-content:center; gap:5px; min-height:7px; }
+.rps-score-dots i { width:6px; height:6px; border-radius:50%; background:#343839; }
+.rps-score-dots .point-you { background:#d9e2df; box-shadow:0 0 8px rgba(220,238,230,.7); }
+.rps-score-dots .point-bot { background:#d58b72; box-shadow:0 0 8px rgba(213,139,114,.65); }
+.rps-score-dots .point-draw { background:#777; }
+.rps-duel { position:relative; width:min(100%,480px); min-height:172px; display:flex; align-items:center; justify-content:space-around; overflow:hidden; margin:0 0 20px; border:1px solid #303638; background:radial-gradient(ellipse at center,#1b2527 0%,#101314 68%); isolation:isolate; }
+.duel-fighter { display:grid; justify-items:center; gap:8px; z-index:1; }
+.duel-fighter small { color:#858f90; font:8px var(--mono); letter-spacing:.16em; }
+.duel-fighter span { display:grid; place-items:center; width:76px; height:76px; border:1px solid #586366; border-radius:50%; background:linear-gradient(145deg,#283638,#121718); font-size:42px; filter:grayscale(1); box-shadow:0 0 22px rgba(168,197,194,.1); }
+.duel-vs { color:#879394; font:10px var(--mono); letter-spacing:.16em; z-index:1; }
+.duel-impact { position:absolute; left:50%; top:50%; color:#f2e4bd; font-size:60px; opacity:0; transform:translate(-50%,-50%) scale(.2); animation:duel-impact .8s .42s ease-out both; text-shadow:0 0 24px rgba(255,222,155,.85); }
+.you-fighter { animation:duel-you-attack 1.25s cubic-bezier(.2,.7,.2,1) both; }
+.bot-fighter { animation:duel-bot-attack 1.25s cubic-bezier(.2,.7,.2,1) both; }
+.rps-duel.win .you-fighter span,.rps-duel.loss .bot-fighter span { border-color:#d4e1d9; box-shadow:0 0 26px rgba(188,226,205,.35); }
+.rps-duel.loss .you-fighter span,.rps-duel.win .bot-fighter span { filter:grayscale(1) brightness(.55); }
+.rps-duel.draw .duel-fighter span { animation:duel-draw .55s .5s ease-in-out both; }
+.rps-choices.is-fighting button:not(.chosen-move) { opacity:.24; filter:grayscale(1); }
+.rps-choices button.chosen-move { border-color:#d2e0dc; box-shadow:0 0 18px rgba(190,221,210,.2); transform:translateY(-4px); }
+.rps-choices button.chosen-move span { animation:duel-choice-pulse .65s ease-in-out infinite alternate; }
+@keyframes duel-you-attack { 0%,100%{transform:translateX(0)} 34%{transform:translateX(35px) scale(1.14)} 58%{transform:translateX(18px) scale(1.05)} }
+@keyframes duel-bot-attack { 0%,100%{transform:translateX(0)} 34%{transform:translateX(-35px) scale(1.14)} 58%{transform:translateX(-18px) scale(1.05)} }
+@keyframes duel-impact { 0%{opacity:0;transform:translate(-50%,-50%) scale(.2) rotate(-30deg)} 35%{opacity:1;transform:translate(-50%,-50%) scale(1.25) rotate(12deg)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.8) rotate(35deg)} }
+@keyframes duel-draw { 0%,100%{transform:scale(1)} 50%{transform:scale(1.16)} }
+@keyframes duel-choice-pulse { from{transform:scale(1)} to{transform:scale(1.12)} }
+@media(prefers-reduced-motion:reduce){.duel-fighter,.duel-impact,.rps-duel.draw .duel-fighter span,.rps-choices button.chosen-move span{animation:none!important}}
