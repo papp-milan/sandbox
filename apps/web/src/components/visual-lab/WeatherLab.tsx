@@ -23,7 +23,9 @@ async function loadWeather(latitude:number,longitude:number,signal:AbortSignal):
 }
 function WeatherIcon({code}:{code:number}) { const kind=weatherKind(code); const Icon=kind==="rain"||kind==="storm"?CloudRain:kind==="snow"?CloudSnow:kind==="clear"?Sun:kind==="cloudy"?CloudSun:Cloud; return <Icon size={17} strokeWidth={1.5}/>; }
 
-export function WeatherLab({onBack}:{onBack:()=>void}) {
+type WeatherFilter = "all" | "sun" | "clouds" | "rain" | "snow" | "storm";
+
+export function WeatherLab({onBack,onGraphClick}:{onBack:()=>void;onGraphClick:()=>void}) {
  const [position,setPosition]=useState({latitude:fallback.latitude,longitude:fallback.longitude,label:fallback.label});
  const [payload,setPayload]=useState<WeatherPayload|null>(null);
  const [selected,setSelected]=useState(0);
@@ -31,6 +33,7 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
  const [error,setError]=useState("");
  const [locationNote,setLocationNote]=useState("Using Munich as a starting point");
  const [reload,setReload]=useState(0);
+ const [weatherFilter,setWeatherFilter]=useState<WeatherFilter>("all");
  useEffect(()=>{
   const controller=new AbortController();setLoading(true);setError("");
   loadWeather(position.latitude,position.longitude,controller.signal).then(result=>{
@@ -60,6 +63,7 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
  const active=todayHours[selectedIndex]??payload?.current;
  const selectedHour=active?Number(active.time.slice(11,13)):12;
  const daily=payload?.daily??[];
+ const matchesFilter=(code:number)=>{const kind=weatherKind(code);if(weatherFilter==="all")return true;if(weatherFilter==="sun")return kind==="clear";if(weatherFilter==="clouds")return kind==="cloudy"||kind==="fog";return kind===weatherFilter;};
  const metrics=active?[
   {label:"Feels like",value:Math.round(active.apparent)+"°",icon:Thermometer},
   {label:"Precipitation",value:active.precipitation.toFixed(1)+" mm",icon:Droplets},
@@ -72,7 +76,7 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
  ]:[];
  return <main className="visual-lab weather-lab">
   <header className="visual-topbar"><button className="back-link" onClick={onBack}><ArrowLeft size={15}/> Back to Visual Lab</button><div className="visual-top-meta"><span>VISUAL LAB</span><i/> EXPERIMENT 002</div></header>
-  <div className="lab-switcher"><span>VISUAL LAB</span><a href="#/visual-lab">GRAPH VISUALIZER</a><span className="switch-active">WEATHER</span></div>
+  <div className="lab-switcher"><span>VISUAL LAB</span><button type="button" onClick={onGraphClick}>GRAPH VISUALIZER</button><span className="switch-active">WEATHER</span></div>
   <section className="visual-heading weather-heading"><div><p className="visual-eyebrow">ATMOSPHERIC EXPLORATION</p><h1>Weather <span>World</span></h1><p className="visual-subtitle">A living snapshot of the atmosphere around you.</p></div><button className="location-button" onClick={locate}><LocateFixed size={14}/> Use my location</button></section>
   <section className="weather-layout">
    <div className="weather-scene-panel">
@@ -98,7 +102,11 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
    <div className="forecast-heading"><div><p className="visual-eyebrow">MOVE THROUGH TIME</p><h2>Hourly forecast</h2></div><span>DRAG TO EXPLORE · 24 HOURS</span></div>
    {todayHours.length>0&&<><div className="today-slider-head"><span>{formatHour(todayHours[0].time)} — {formatHour(todayHours[todayHours.length-1].time)}</span><strong>{formatHour(active?.time??todayHours[0].time)}</strong></div><input aria-label="Select hour of today" className="weather-timeline" type="range" min="0" max={todayHours.length-1} step="1" value={selectedIndex} onChange={e=>setSelected(Number(e.target.value))}/><div className="timeline-labels"><span>00:00</span><span>{todayHours.length} HOURS · TODAY ONLY</span><span>23:00</span></div><div className="hour-strip">{todayHours.map((h,i)=><button key={h.time} aria-pressed={i===selectedIndex} className={i===selectedIndex?"hour-card selected":"hour-card"} onClick={()=>setSelected(i)}><span>{formatHour(h.time)}</span><WeatherIcon code={h.code}/><strong>{Math.round(h.temperature)}°</strong><small>{Math.round(h.precipitationProbability)}%</small></button>)}</div></>}
   </section>
-  <section className="forecast-panel week-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">LOOK AHEAD</p><h2>Next 7 days</h2></div><span>DAILY OUTLOOK</span></div><div className="week-strip">{daily.map((d,i)=><div className="day-card" key={d.sunrise}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong></div>)}</div></section>
+  <section className="forecast-panel week-panel"><div className="forecast-heading"><div><p className="visual-eyebrow">LOOK AHEAD</p><h2>Next 7 days</h2></div><span>DAILY OUTLOOK · HIGHLIGHT MATCHES</span></div>
+   <div className="weather-filters" role="group" aria-label="Highlight days by weather">
+    {([{id:"all",label:"All"},{id:"sun",label:"☀ Sun"},{id:"clouds",label:"☁ Clouds"},{id:"rain",label:"☂ Rain"},{id:"snow",label:"❄ Snow"},{id:"storm",label:"ϟ Storm"}] as {id:WeatherFilter;label:string}[]).map(filter=><button type="button" key={filter.id} aria-pressed={weatherFilter===filter.id} className={weatherFilter===filter.id?"active":""} onClick={()=>setWeatherFilter(filter.id)}>{filter.label}</button>)}
+   </div>
+   <div className="week-strip">{daily.map((d,i)=>{const match=matchesFilter(d.code);return <div className={"day-card "+(match?"filter-match":"filter-muted")} key={d.sunrise} title={weatherLabel(d.code)}><span>{i===0?"Today":formatDay(d.sunrise)}</span><WeatherIcon code={d.code}/><strong>{Math.round(d.max)}° <small>{Math.round(d.min)}°</small></strong><em>{weatherLabel(d.code)}</em></div>;})}</div></section>
   {error&&<p className="weather-error" role="alert">{error} <button onClick={()=>setReload(value=>value+1)}>Try again</button></p>}
   <p className="weather-attribution">WEATHER DATA BY OPEN-METEO · {locationNote.toUpperCase()} · UPDATES ON REFRESH</p>
  </main>;
