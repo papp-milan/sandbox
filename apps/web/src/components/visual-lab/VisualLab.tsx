@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, Orbit, RotateCcw, Scan, SlidersHorizontal } from "lucide-react";
 import { GraphCanvas } from "./GraphCanvas";
+import { WeatherLab } from "./WeatherLab";
 import { compileSurfaceExpression } from "./graph-utils";
 
 const presets = [
@@ -20,6 +21,9 @@ export function VisualLab({ onBack }: { onBack: () => void }) {
   const [frequency, setFrequency] = useState(1);
   const [mode, setMode] = useState<RenderMode>("combined");
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<"graph" | "weather">("graph");
+
+  if (activeTab === "weather") return <WeatherLab onBack={() => setActiveTab("graph")} />;
 
   const activePreset = presets.find((preset) => preset.expression === expression)?.name ?? "Custom function";
   const formulaValid = useMemo(() => {
@@ -48,6 +52,7 @@ export function VisualLab({ onBack }: { onBack: () => void }) {
         <button className="back-link" onClick={onBack}><ArrowLeft size={15} /> Back to Sandbox</button>
         <div className="visual-top-meta"><span>VISUAL LAB</span><i /> EXPERIMENT 001</div>
       </header>
+      <div className="lab-switcher"><span>VISUAL LAB</span><button className="switch-active" onClick={() => setActiveTab("graph")}>GRAPH VISUALIZER</button><button onClick={() => setActiveTab("weather")}>WEATHER</button></div>
       <section className="visual-heading">
         <div>
           <p className="visual-eyebrow">MATHEMATICAL EXPLORATION</p>
