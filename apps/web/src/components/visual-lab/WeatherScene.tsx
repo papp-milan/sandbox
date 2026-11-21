@@ -23,7 +23,7 @@ function CloudLayer({night,offset=0,scale=1}:{night:boolean;offset?:number;scale
 }
 function WeatherWorld({weather,hour}:{weather:HourlyWeather;hour:number}) {
  const kind=weatherKind(weather.code),rainy=kind==="rain"||kind==="storm",snowy=kind==="snow",night=hour<5||hour>=21,golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20),windy=weather.wind>14;
- const skyRef=useRef<THREE.Color>(new THREE.Color()),groundRef=useRef<THREE.Mesh>(null),sunRef=useRef<THREE.Group>(null),haloRef=useRef<THREE.Mesh>(null),flashRef=useRef<THREE.PointLight>(null),rainRef=useRef<THREE.Points>(null),windRef=useRef<THREE.Points>(null);
+ const groundRef=useRef<THREE.Mesh>(null),sunRef=useRef<THREE.Group>(null),haloRef=useRef<THREE.Mesh>(null),flashRef=useRef<THREE.PointLight>(null),rainRef=useRef<THREE.Points>(null),windRef=useRef<THREE.Points>(null);
  const skyTarget=new THREE.Color(kind==="storm"?(night?"#18263b":"#52677c"):rainy?(night?"#1d3854":"#6091aa"):snowy?(night?"#263b57":"#a8cbd8"):kind==="fog"?"#9caeb6":kind==="cloudy"?(night?"#253b57":"#7eabc4"):(night?"#101e3d":golden?"#ed9c69":"#59b6e7"));
  const groundTarget=new THREE.Color(night?"#182b3a":snowy?"#e0edf0":rainy?"#365d68":"#4f8b67");
  const rainPositions=useMemo(()=>{const a=new Float32Array(900*3);for(let i=0;i<900;i++){a[i*3]=(Math.random()-.5)*18;a[i*3+1]=Math.random()*12-3;a[i*3+2]=(Math.random()-.5)*12;}return a;},[]);
