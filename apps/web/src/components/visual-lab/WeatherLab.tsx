@@ -75,8 +75,16 @@ export function WeatherLab({onBack}:{onBack:()=>void}) {
   <section className="weather-layout">
    <div className="weather-scene-panel">
     <div className="weather-scene-meta"><span><i className="stage-dot"/> LIVE CONDITIONS</span><span>{position.label.toUpperCase()}</span></div>
-    <div className="weather-scene">{active&&<WeatherScene weather={active} hour={selectedHour} />}{loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}</div>
-    <div className="weather-current"><div><span className="weather-condition"><WeatherIcon code={active?.code??0}/>{active?weatherLabel(active.code):"Loading weather"}</span><strong>{active?Math.round(active.temperature)+"°":"—"}</strong><small>{active?"Feels like "+Math.round(active.apparent)+"°":"Fetching forecast"}</small></div><div className="weather-time">{active?formatHour(active.time):"—"}<small>{selected===0?"FORECAST":"SELECTED HOUR"}</small></div></div>
+    <div className="weather-scene">
+     {active&&<WeatherScene weather={active} hour={selectedHour} />}
+     <div className="weather-hero-copy">
+      <span className="weather-hero-kicker">{active?weatherLabel(active.code).toUpperCase():"WEATHER LOADING"} · {active?formatHour(active.time):"—"}</span>
+      <strong>{active?Math.round(active.temperature)+"°":"—"}</strong>
+      <span className="weather-hero-feels">FEELS LIKE {active?Math.round(active.apparent)+"°":"—"}</span>
+     </div>
+     <div className="weather-hero-location">{position.label.toUpperCase()}<span>{selected===0?"LIVE CONDITIONS":"FORECAST EXPLORATION"}</span></div>
+     {loading&&<div className="weather-loading">READING THE ATMOSPHERE…</div>}
+    </div>
    </div>
    <aside className="weather-side">
     <div className="weather-side-head"><span>ATMOSPHERIC DATA</span><button onClick={()=>setReload(value=>value+1)} aria-label="Refresh weather"><RefreshCw size={13}/></button></div>
