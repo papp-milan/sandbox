@@ -1275,3 +1275,32 @@ a {
   border-color:#f0b2b2;
 }
 .ocean-grid button.revealed-ship.ship-hit::after { border-color:rgba(255,235,235,.58); }
+
+
+/* Battleships — invalid placement feedback and fixed square cell geometry. */
+.own-fleet-grid,
+.ocean-grid {
+  grid-template-rows: repeat(10, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+}
+.own-fleet-grid button,
+.ocean-grid button {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+}
+.ocean-grid button.revealed-ship {
+  overflow: hidden;
+  z-index: 0;
+}
+.own-fleet-grid button.ship-preview.preview-invalid::before {
+  background: linear-gradient(145deg, rgba(222,112,112,.92), rgba(111,39,46,.88));
+  border: 1px solid #ffaaaa;
+  box-shadow: 0 0 14px rgba(224,76,88,.42), inset 0 0 12px rgba(255,205,205,.18);
+}
+.own-fleet-grid button.ship-preview.preview-invalid::after {
+  border-color: rgba(255,220,220,.78);
+}
