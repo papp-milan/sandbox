@@ -30,7 +30,7 @@ export function VisualLab({ onBack }: { onBack: () => void }) {
     try { compileSurfaceExpression(draft); return true; } catch { return false; }
   }, [draft]);
 
-  if (activeTab === "weather") return <WeatherLab onBack={() => setActiveTab("graph")} />;
+  if (activeTab === "weather") return <WeatherLab onBack={() => setActiveTab("graph")} onGraphClick={() => setActiveTab("graph")} />;
 
   const applyExpression = () => {
     try {
