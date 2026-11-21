@@ -984,3 +984,35 @@ a {
  .location-popover { right:-3px; }
  .radar-map { height:300px; }
 }
+
+/* Seasonal Weather World — fantasy alpine world treatment */
+.weather-scene { background: #172b3b; }
+.weather-scene canvas { animation: seasonal-world-reveal 1.8s cubic-bezier(.2,.72,.2,1) both; }
+.weather-season-kicker {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  padding:7px 10px;
+  border:1px solid rgba(255,255,255,.42);
+  border-radius:999px;
+  background:rgba(10,18,24,.25);
+  color:#fff;
+  font:8px var(--mono);
+  letter-spacing:.17em;
+  backdrop-filter:blur(8px);
+  text-shadow:0 1px 10px rgba(0,0,0,.35);
+}
+.weather-season-kicker::before { content:""; width:6px; height:6px; border-radius:50%; background:currentColor; box-shadow:0 0 12px currentColor; }
+.weather-season-kicker.season-spring { color:#ffe0eb; border-color:rgba(255,224,235,.58); }
+.weather-season-kicker.season-summer { color:#ffe3a4; border-color:rgba(255,227,164,.58); }
+.weather-season-kicker.season-autumn { color:#ffc18c; border-color:rgba(255,193,140,.58); }
+.weather-season-kicker.season-winter { color:#d8f1ff; border-color:rgba(216,241,255,.58); }
+@keyframes seasonal-world-reveal {
+  from { opacity:.25; filter:brightness(.55) saturate(.65) blur(5px); transform:scale(1.035); }
+  55% { opacity:1; filter:brightness(1.12) saturate(1.12) blur(0); }
+  to { opacity:1; filter:brightness(1) saturate(1); transform:scale(1); }
+}
+@media(prefers-reduced-motion:reduce) {
+ .weather-scene canvas { animation:none; }
+}
