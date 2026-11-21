@@ -49,7 +49,13 @@ function Cabin({season}:{season:Season}){
   <mesh position={[0,.55,0]}><boxGeometry args={[1.5,1.1,1.15]}/><meshStandardMaterial color={season==="winter"?"#574c46":"#78533b"}/></mesh>
   <mesh position={[0,1.27,0]} rotation={[0,Math.PI/4,0]}><coneGeometry args={[1.12,.85,4]}/><meshStandardMaterial color={season==="winter"?"#edf5f8":season==="autumn"?"#603e35":"#55443a"}/></mesh>
   <mesh position={[.28,.56,.59]}><planeGeometry args={[.27,.38]}/><meshStandardMaterial color="#ffd58a" emissive="#ffb65e" emissiveIntensity={season==="winter"?1.6:.55}/></mesh>
-  <mesh position={[-.42,.56,.59]}><planeGeometry args={[.24,.34]}/><meshStandardMaterial color="#ffd58a" emissive="#ffb65e" emissiveIntensity={season==="winter"?1.6:.55}/></mesh>\n  <mesh position={[0,.56,.6]}><boxGeometry args={[.18,.9,.12]}/><meshStandardMaterial color="#49362b"/></mesh>\n  <mesh position={[.74,.9,0]}><boxGeometry args={[.22,.9,.22]}/><meshStandardMaterial color="#57453a"/></mesh>\n  <mesh position={[.28,.56,.66]}><boxGeometry args={[.31,.42,.035]}/><meshStandardMaterial color="#9b704e"/></mesh>\n  <mesh position={[-.42,.56,.66]}><boxGeometry args={[.28,.38,.035]}/><meshStandardMaterial color="#9b704e"/></mesh>\n  <mesh position={[.28,.56,.69]}><boxGeometry args={[.025,.38,.02]}/><meshStandardMaterial color="#4a3c34"/></mesh>\n  <mesh position={[-.42,.56,.69]}><boxGeometry args={[.025,.34,.02]}/><meshStandardMaterial color="#4a3c34"/></mesh>
+  <mesh position={[-.42,.56,.59]}><planeGeometry args={[.24,.34]}/><meshStandardMaterial color="#ffd58a" emissive="#ffb65e" emissiveIntensity={season==="winter"?1.6:.55}/></mesh>
+  <mesh position={[0,.56,.6]}><boxGeometry args={[.18,.9,.12]}/><meshStandardMaterial color="#49362b"/></mesh>
+  <mesh position={[.74,.9,0]}><boxGeometry args={[.22,.9,.22]}/><meshStandardMaterial color="#57453a"/></mesh>
+  <mesh position={[.28,.56,.66]}><boxGeometry args={[.31,.42,.035]}/><meshStandardMaterial color="#9b704e"/></mesh>
+  <mesh position={[-.42,.56,.66]}><boxGeometry args={[.28,.38,.035]}/><meshStandardMaterial color="#9b704e"/></mesh>
+  <mesh position={[.28,.56,.69]}><boxGeometry args={[.025,.38,.02]}/><meshStandardMaterial color="#4a3c34"/></mesh>
+  <mesh position={[-.42,.56,.69]}><boxGeometry args={[.025,.34,.02]}/><meshStandardMaterial color="#4a3c34"/></mesh>
  </group>;
 }
 function WeatherParticles({weather,season}:{weather:HourlyWeather;season:Season}){
@@ -80,7 +86,7 @@ function TerrainDetails({season}:{season:Season}){
  const path=useMemo(()=>Array.from({length:13},(_,i)=>({x:3.1-i*.42,z:2.7-i*.23,s:.3+(i%3)*.08})),[]);
  return <>
   <group>
-   <mesh position={[0,-2.12,1.35]} rotation={[-Math.PI/2,0,0]} scale={[3.2,1.2,1]}><circleGeometry args={[1,48]}/><meshStandardMaterial color={season==="winter"?"#c9d9df":season==="autumn"?"#a68a69":"#9b9a78"} roughness={1}/></mesh>
+   <mesh position={[0,-2.035,1.35]} rotation={[-Math.PI/2,0,0]} scale={[3.2,1.2,1]}><circleGeometry args={[1,48]}/><meshStandardMaterial color={season==="winter"?"#c9d9df":season==="autumn"?"#a68a69":"#9b9a78"} roughness={1}/></mesh>
    <mesh position={[-.5,-2.08,-1.3]} rotation={[-Math.PI/2,0,0]} scale={[3.75,1.22,1]}><circleGeometry args={[1,64]}/><meshStandardMaterial color={palette.water} roughness={.2} metalness={.16} transparent opacity={.96}/></mesh>
    {Array.from({length:5},(_,i)=><mesh key={i} position={[-.5+(i-2)*.95,-2.055,-1.45+Math.sin(i)*.24]} rotation={[-Math.PI/2,0,0]} scale={[.38,.035,1]}><circleGeometry args={[1,24]}/><meshBasicMaterial color="#d7f0ed" transparent opacity={.18}/></mesh>)}
   </group>
@@ -100,7 +106,8 @@ function TerrainDetails({season}:{season:Season}){
   </group>
  </>;
 }
-\nfunction LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeather;hour:number;latitude:number;seasonOverride?:Season}){
+
+function LivingWorld({weather,hour,latitude,seasonOverride}:{weather:HourlyWeather;hour:number;latitude:number;seasonOverride?:Season}){
  const season=seasonOverride??getSeason(latitude),theme=themes[season],kind=weatherKind(weather.code),night=hour<5||hour>=21,storm=kind==="storm",foggy=kind==="fog",cloudy=kind!=="clear"&&!foggy,golden=(hour>=5&&hour<=8)||(hour>=17&&hour<=20);
  const ground=useRef<THREE.Mesh>(null),water=useRef<THREE.Mesh>(null),flash=useRef<THREE.PointLight>(null),sun=useRef<THREE.Group>(null),intro=useRef(0),clouds=useRef<THREE.Group>(null);
  const targetSky=new THREE.Color(storm?"#26364d":foggy?"#aab8bd":night?"#101d37":golden?theme.horizon:theme.sky);
@@ -123,9 +130,11 @@ function TerrainDetails({season}:{season:Season}){
   {!night&&<group ref={sun}><mesh><sphereGeometry args={[.72,32,32]}/><meshStandardMaterial color="#ffe4a5" emissive="#ffb75b" emissiveIntensity={1.8}/></mesh><mesh><sphereGeometry args={[1.5,24,24]}/><meshBasicMaterial color="#ffd18a" transparent opacity={.12}/></mesh></group>}
   {night&&<mesh position={[-4,4,-5]}><sphereGeometry args={[.48,32,24]}/><meshStandardMaterial color="#e7f0ff" emissive="#b8d5ff" emissiveIntensity={1.2}/></mesh>}
   <group position={[0,0,-5]}><Mountain position={[-7,-.1,0]} scale={[3.3,2.8,1]} season={season}/><Mountain position={[-3.7,.1,-.6]} scale={[3.8,3.5,1]} season={season}/><Mountain position={[.2,-.1,-.9]} scale={[4.5,3.7,1]} season={season}/><Mountain position={[5,-.05,-.5]} scale={[3.6,3.2,1]} season={season}/><Mountain position={[8,-.1,0]} scale={[3,2.7,1]} season={season}/></group>
-  {foggy&&<FogBanks/>}\n  {cloudy&&<group ref={clouds}><Cloud position={[-4,3,-3]} scale={storm?1.6:1.2} storm={storm}/><Cloud position={[1.5,3.7,-4]} scale={storm?1.8:1.1} storm={storm}/><Cloud position={[6,2.9,-3]} scale={.9} storm={storm}/></group>}
+  {foggy&&<FogBanks/>}
+  {cloudy&&<group ref={clouds}><Cloud position={[-4,3,-3]} scale={storm?1.6:1.2} storm={storm}/><Cloud position={[1.5,3.7,-4]} scale={storm?1.8:1.1} storm={storm}/><Cloud position={[6,2.9,-3]} scale={.9} storm={storm}/></group>}
   <mesh ref={ground} rotation={[-Math.PI/2,0,0]} position={[0,-2.05,0]}><planeGeometry args={[200,200]}/><meshStandardMaterial color={theme.ground} roughness={1}/></mesh>
-  <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,64]}/><meshStandardMaterial color={theme.water} roughness={.16} metalness={.18} transparent opacity={.94}/></mesh>\n  <TerrainDetails season={season}/>
+  <mesh ref={water} rotation={[-Math.PI/2,0,0]} position={[-.5,-1.99,-1.3]} scale={[3.9,1.3,1]}><circleGeometry args={[1,64]}/><meshStandardMaterial color={theme.water} roughness={.16} metalness={.18} transparent opacity={.94}/></mesh>
+  <TerrainDetails season={season}/>
   {treePositions.map(([x,y,z,s],i)=><SeasonalTree key={i} position={[x,y,z]} scale={s} season={season}/>)}
   <Cabin season={season}/>
   {season==="spring"&&<group>{[-5,-3.5,4,5.5].map((x,i)=><mesh key={i} position={[x,-1.95,1.2]} rotation={[0,0,Math.sin(i)*.12]}><sphereGeometry args={[.12,10,8]}/><meshStandardMaterial color="#f3b8ce"/></mesh>)}</group>}
