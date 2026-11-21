@@ -39,10 +39,11 @@ function WeatherWorld({weather,hour}:{weather:HourlyWeather;hour:number}) {
   <directionalLight position={[-5,7,5]} intensity={night?.85:1.9} color="#fff4e7"/>
   <directionalLight position={[4,2,-4]} intensity={.7} color={palette.glow}/>
   {night&&<Stars radius={70} depth={40} count={900} factor={2} fade speed={.25}/>}
-  {!rainy&&!snowy&&!foggy&&<group ref={sunRef}>
+  {!night&&!rainy&&!snowy&&!foggy&&<group ref={sunRef}>
    <mesh><sphereGeometry args={[.82,48,48]}/><meshStandardMaterial color="#f4ca83" emissive="#e6a94e" emissiveIntensity={.7}/></mesh>
    <mesh><sphereGeometry args={[1.22,32,32]}/><meshBasicMaterial color="#f4ca83" transparent opacity={.12}/></mesh>
   </group>}
+  {night&&<mesh position={[-2.5,2.5,-2.8]}><sphereGeometry args={[.58,40,32]}/><meshStandardMaterial color="#e0e5ed" emissive="#9caec4" emissiveIntensity={.22}/></mesh>}
   {kind!=="clear"&&<CloudMass night={night} dense={kind==="storm"||kind==="rain"||kind==="cloudy"}/>}
   {rainy&&<points ref={rainRef}><bufferGeometry><bufferAttribute attach="attributes-position" args={[particles,3]}/></bufferGeometry><pointsMaterial color="#e3edf4" size={.045} transparent opacity={.76} sizeAttenuation/></points>}
   {snowy&&<points ref={rainRef}><bufferGeometry><bufferAttribute attach="attributes-position" args={[particles,3]}/></bufferGeometry><pointsMaterial color="#fff" size={.085} transparent opacity={.95} sizeAttenuation/></points>}
