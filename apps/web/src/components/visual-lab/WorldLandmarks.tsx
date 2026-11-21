@@ -109,51 +109,73 @@ function RuinedGate({ season }: { season: Season }) {
 function Waterfall({ season }: { season: Season }) {
   const water = palettes[season].water;
   const flow = useRef<THREE.Group>(null);
+  const spray = useRef<THREE.Group>(null);
   const pool = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
     if (flow.current) flow.current.children.forEach((child, i) => {
-      child.position.y = 1.48 - ((t * (1.15 + (i % 3) * 0.22) + i * 0.31) % 1.55);
-      child.scale.y = 0.42 + Math.sin(t * 4 + i) * 0.08;
+      child.position.y = 0.92 - ((t * (1.05 + (i % 4) * 0.19) + i * 0.23) % 1.9);
+      child.position.x = Math.sin(t * 2.2 + i) * 0.035;
     });
+    if (spray.current) {
+      spray.current.children.forEach((child, i) => {
+        child.position.y = -0.78 + ((t * 0.48 + i * 0.17) % 0.72);
+        child.position.x = Math.sin(t * 1.8 + i * 2) * 0.12;
+      });
+    }
     if (pool.current) {
-      const pulse = 1 + Math.sin(t * 2.2) * 0.045;
-      pool.current.scale.set(0.78 * pulse, 0.38 * pulse, 1);
-      pool.current.rotation.z = t * 0.08;
+      const pulse = 1 + Math.sin(t * 2.4) * 0.035;
+      pool.current.scale.set(0.88 * pulse, 0.48 * pulse, 1);
     }
   });
   return (
-    <group position={[5.8, -1.28, -3.55]}>
-      <mesh position={[0, 0.8, 0]}>
-        <boxGeometry args={[0.88, 1.8, 0.12]} />
-        <meshBasicMaterial color={water} transparent opacity={0.48} side={THREE.DoubleSide} depthWrite={false} />
+    <group position={[5.35, -0.82, -2.15]}>
+      {/* A dark rock face and clear upper lip make the source and drop readable. */}
+      <mesh position={[0, -0.02, -0.18]} scale={[1.05, 1.28, 0.42]}>
+        <dodecahedronGeometry args={[1, 1]} />
+        <meshStandardMaterial color={palettes[season].stone} roughness={1} />
       </mesh>
-      <group ref={flow} position={[0, 0, 0.09]}>
-        {Array.from({ length: 13 }, (_, i) => (
-          <mesh key={i} position={[(i % 5 - 2) * 0.145, 1.3, 0]}>
-            <capsuleGeometry args={[0.018 + (i % 3) * 0.006, 0.22 + (i % 4) * 0.06, 3, 5]} />
-            <meshBasicMaterial color={i % 3 === 0 ? "#e8ffff" : water} transparent opacity={0.72} depthWrite={false} />
+      <mesh position={[0, 0.98, 0.12]}>
+        <boxGeometry args={[1.72, 0.24, 0.82]} />
+        <meshStandardMaterial color={palettes[season].stone} roughness={1} />
+      </mesh>
+      <mesh position={[0, 0.02, 0.18]}>
+        <boxGeometry args={[0.98, 1.9, 0.045]} />
+        <meshBasicMaterial color={water} transparent opacity={0.76} side={THREE.DoubleSide} depthWrite={false} />
+      </mesh>
+      <group ref={flow} position={[0, 0, 0.23]}>
+        {Array.from({ length: 22 }, (_, i) => (
+          <mesh key={i} position={[(i % 7 - 3) * 0.125, 0.92, 0.025]}>
+            <capsuleGeometry args={[0.018 + (i % 3) * 0.009, 0.22 + (i % 4) * 0.09, 3, 6]} />
+            <meshBasicMaterial color={i % 4 === 0 ? "#f0ffff" : water} transparent opacity={0.9} depthWrite={false} />
           </mesh>
         ))}
       </group>
-      <mesh position={[0, 1.72, -0.08]}>
-        <boxGeometry args={[1.12, 0.16, 0.35]} />
-        <meshStandardMaterial color={palettes[season].stone} roughness={1} />
-      </mesh>
-      <mesh ref={pool} position={[0, -0.1, 0.12]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -1.0, 0.28]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.12, 0.58, 1]}>
         <circleGeometry args={[1, 48]} />
-        <meshStandardMaterial color={water} transparent opacity={0.72} roughness={0.12} metalness={0.2} />
+        <meshStandardMaterial color={water} roughness={0.12} metalness={0.16} transparent opacity={0.94} />
       </mesh>
-      {[-0.52, -0.35, 0.38, 0.56].map((x, i) => (
-        <mesh key={i} position={[x, 0.2 + (i % 2) * 0.18, 0.18]} scale={[0.25, 0.16, 0.2]}>
+      <mesh ref={pool} position={[0, -0.96, 0.3]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[1, 48]} />
+        <meshBasicMaterial color="#d9fbff" transparent opacity={0.23} depthWrite={false} />
+      </mesh>
+      <group ref={spray} position={[0, 0, 0.36]}>
+        {Array.from({ length: 12 }, (_, i) => (
+          <mesh key={i} position={[(i - 5.5) * 0.085, -0.78, 0]}>
+            <sphereGeometry args={[0.035 + (i % 3) * 0.012, 8, 8]} />
+            <meshBasicMaterial color="#eaffff" transparent opacity={0.82} depthWrite={false} />
+          </mesh>
+        ))}
+      </group>
+      {/* The outflow visibly joins the lake instead of ending beneath the terrain. */}
+      <mesh position={[-0.52, -1.13, 0.62]} rotation={[-Math.PI / 2, 0, -0.14]} scale={[0.34, 0.95, 1]}>
+        <circleGeometry args={[1, 32]} />
+        <meshStandardMaterial color={water} roughness={0.16} metalness={0.12} />
+      </mesh>
+      {[-0.78, -0.58, 0.62, 0.82].map((x, i) => (
+        <mesh key={i} position={[x, -0.82 + (i % 2) * 0.12, 0.42]} scale={[0.3, 0.22, 0.26]}>
           <dodecahedronGeometry args={[1, 0]} />
           <meshStandardMaterial color={palettes[season].stone} roughness={1} />
-        </mesh>
-      ))}
-      {Array.from({ length: 7 }, (_, i) => (
-        <mesh key={"spray-" + i} position={[(i - 3) * 0.12, -0.02 + (i % 2) * 0.06, 0.26]} scale={[0.035, 0.035, 0.035]}>
-          <sphereGeometry args={[1, 8, 8]} />
-          <meshBasicMaterial color="#e8ffff" transparent opacity={0.8} />
         </mesh>
       ))}
     </group>
