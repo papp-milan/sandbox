@@ -1047,3 +1047,13 @@ a {
 .scene-test-note { color:#8b9ba3; }
 @keyframes scene-controls-in { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 @media(prefers-reduced-motion:reduce) { .scene-test-controls { animation:none; } }
+
+
+/* Radar interaction: wheel gestures belong to the map, never the document. */
+.radar-map { overscroll-behavior: contain; }
+.radar-map, .radar-map * { touch-action: none; }
+.radar-map { box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), inset 0 18px 36px rgba(10,20,25,.12); }
+.radar-tile img { filter: saturate(.88) contrast(1.04); }
+/* More dimensional weather scene materials and atmospheric depth. */
+.weather-scene { box-shadow: inset 0 1px 0 rgba(255,255,255,.16), inset 0 -48px 90px rgba(7,18,23,.16); }
+.weather-scene canvas { filter: drop-shadow(0 16px 22px rgba(0,0,0,.13)); }
