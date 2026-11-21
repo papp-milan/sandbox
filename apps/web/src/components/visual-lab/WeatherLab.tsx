@@ -30,9 +30,9 @@ function rainCode(precip:number){return precip>8?65:61;}
 async function loadWeather(latitude:number,longitude:number,signal:AbortSignal):Promise<{payload:WeatherPayload;days:DailyWeather[]}>{
  const params=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),timezone:"auto",forecast_days:"16",current:"temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m",hourly:"temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,uv_index,wind_speed_10m,wind_direction_10m,surface_pressure,visibility,weather_code",daily:"sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,snowfall_sum,wind_speed_10m_max,cloud_cover_mean"});
  const ensembleParams=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),timezone:"auto",models:"gfs05",forecast_days:"30",daily:"temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,precipitation_hours,wind_speed_10m_max,cloud_cover_mean"});
- const [response,extendedResponse]=await Promise.all([fetch(endpoint+"?"+params,{signal}),fetch(ensembleEndpoint+"?"+ensembleParams,{signal})]);
+ const [response,extendedResponse]=await Promise.all([fetch(endpoint+"?"+params,{signal}),fetch(ensembleEndpoint+"?"+ensembleParams,{signal}).catch(()=>null)]);
  if(!response.ok)throw new Error("Weather service is currently unavailable.");
- const [raw,extended]=await Promise.all([response.json(),extendedResponse.ok?extendedResponse.json():Promise.resolve(null)]);
+ const [raw,extended]=await Promise.all([response.json(),extendedResponse?.ok?extendedResponse.json():Promise.resolve(null)]);
  const currentTime=String(raw.current.time);
  const hourly=(raw.hourly.time as string[]).map((_:string,i:number)=>mapHour(raw.hourly,i));
  const nextIndex=hourly.findIndex(h=>h.time>currentTime);
