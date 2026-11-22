@@ -4,6 +4,7 @@ import {
     ArrowLeft,
     AudioLines,
     ChevronDown,
+    ExternalLink,
     Heart,
     ListMusic,
     Maximize2,
@@ -117,6 +118,7 @@ function StationButton({item, onPlay, active, favorite, onFavorite}: {
             <Waves size={17}/> : <Play size={16}/>}</span><span
             className="station-copy"><strong>{item.title}</strong><small>{item.genre} · {item.description}</small></span>
         </button>
+        <a className="station-external-link" href={"https://somafm.com/" + item.id + "/"} target="_blank" rel="noreferrer" aria-label={"Open " + item.title + " on SomaFM"} title="Open on SomaFM"><ExternalLink size={13}/></a>
         <button className={favorite ? "station-favorite selected" : "station-favorite"} onClick={onFavorite}
                 aria-label={favorite ? "Remove favorite" : "Add favorite"}><Heart size={15}
                                                                                   fill={favorite ? "currentColor" : "none"}/>
@@ -283,24 +285,31 @@ export function AuditoryLab({onBack}: { onBack: () => void }) {
 export function GlobalMiniPlayer({onOpen}: { onOpen: () => void }) {
     const {station, playing, loading, track, artist, volume, muted, pause, play, setVolume, toggleMute} = useAudio();
     const [route, setRoute] = useState(window.location.pathname);
+    const [expired, setExpired] = useState(false);
     useEffect(() => {
         const update = () => setRoute(window.location.pathname);
         window.addEventListener("popstate", update);
         return () => window.removeEventListener("popstate", update)
     }, []);
-    if (!station || !playing || route === "/auditory-lab") return null;
-    return <aside className="auditory-mini-player">
+    useEffect(() => {
+        if (playing || loading || !station) { setExpired(false); return; }
+        const timeout = window.setTimeout(() => setExpired(true), 10000);
+        return () => window.clearTimeout(timeout);
+    }, [playing, loading, station?.id]);
+    if (!station || expired || route === "/auditory-lab") return null;
+    return <aside className={"auditory-mini-player " + (playing ? "is-playing" : "is-paused")}>
         <button className="mini-player-info" onClick={onOpen}><span
             className="mini-player-wave"><i/><i/><i/><i/><i/></span><span><strong>{station.title}</strong><small>{track} · {artist}</small></span>
         </button>
         <button className="mini-player-control" onClick={() => playing ? pause() : void play()}
-                aria-label={playing ? "Pause" : "Play"}>{loading ? "…" :
-            <Pause size={17} fill="currentColor"/>}</button>
+                aria-label={playing ? "Pause" : "Play"}>{loading ? "…" : playing ?
+            <Pause size={17} fill="currentColor"/> : <Play size={17} fill="currentColor"/>}</button>
         <button className="mini-player-control mini-volume-toggle" onClick={toggleMute}
                 aria-label="Toggle mute">{muted || volume === 0 ? <VolumeX size={16}/> : <Volume2 size={16}/>}</button>
         <input className="mini-volume" aria-label="Volume" type="range" min="0" max="1" step=".01"
                value={muted ? 0 : volume} onChange={e => setVolume(Number(e.target.value))}/>
         <button className="mini-player-close" onClick={onOpen} aria-label="Open Auditory Lab"><Maximize2 size={15}/>
         </button>
+        {!playing && !loading && <div className="mini-player-dismiss-track" aria-label="Player closes in 10 seconds"><span/></div>}
     </aside>;
 }

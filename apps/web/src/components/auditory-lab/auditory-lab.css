@@ -776,3 +776,25 @@
         transition: none
     }
 }
+
+/* SomaFM station links and paused mini-player timeout */
+.auditory-station { position:relative; }
+.station-external-link {
+    width:28px;height:32px;flex:none;display:grid;place-items:center;
+    color:#666;text-decoration:none;transition:color .15s;
+}
+.station-external-link:hover { color:#e87535; }
+.auditory-mini-player { padding-bottom:12px; }
+.mini-player-dismiss-track {
+    position:absolute;left:0;right:0;bottom:0;height:2px;
+    overflow:hidden;background:#292522;
+}
+.mini-player-dismiss-track span {
+    display:block;width:100%;height:100%;background:#e87535;
+    transform-origin:left;animation:mini-player-dismiss 10s linear forwards;
+}
+@keyframes mini-player-dismiss { from { transform:scaleX(1); } to { transform:scaleX(0); } }
+.auditory-mini-player.is-paused .mini-player-wave i { animation-play-state:paused; transform:scaleY(.45); }
+@media (prefers-reduced-motion:reduce) {
+ .mini-player-dismiss-track span { animation:none; transform:scaleX(0); }
+}
