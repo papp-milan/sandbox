@@ -15,12 +15,6 @@ const labs = [
   { id: "05", title: "Games Lab", description: "Play strategy games against bots that analyze, learn and think ahead.", icon: BrainCircuit, path: "/games-lab" },
   { id: "06", title: "Auditory Lab", description: "Listen to independent radio and explore sound in real time.", icon: AudioLines, path: "/auditory-lab" },
 ];
-const ideas = [
-  ["01", "Algorithm Visualizer", "ALGORITHMS"],
-  ["02", "Audio Lab", "AUDIO / SIGNALS"],
-  ["03", "Workflow Lab", "PROCESS DESIGN"],
-  ["04", "Backend Lab", "JAVA / SPRING"],
-];
 export function navigate(path: string) {
   const target = path.startsWith("/") ? path : `/${path}`;
   if (window.location.pathname !== target || window.location.search || window.location.hash) {
