@@ -22,8 +22,22 @@ export function AudioProvider({children}:{children:ReactNode}) {
  useEffect(()=>{if(audioRef.current){audioRef.current.volume=volume;audioRef.current.muted=muted}},[volume,muted]);
  useEffect(()=>{localStorage.setItem("auditory-favorites",JSON.stringify(favorites))},[favorites]);
  const refreshMetadata=useCallback(async(id:string)=>{try{const r=await fetch(`https://somafm.com/songs/${id}.json`,{cache:"no-store"});if(!r.ok)return;const d=await r.json();const song=d.song||d.songs?.[0]||d;if(song.title)setTrack(song.title);if(song.artist)setArtist(song.artist);else if(song.album)setArtist(song.album)}catch{/* Metadata is optional; playback is independent. */}},[]);
- const play=useCallback(async(next?:Station)=>{const target=next||station||stations[0];if(!target)return;const audio=audioRef.current;if(!audio)return;setError("");if(next||target.id!==station?.id){setStation(target);setTrack("Connecting to stream…");setArtist(target.title);setLoading(true);audio.pause();audio.crossOrigin="anonymous";audio.src=target.playlists?.find(p=>p.url&&(!p.format||p.format.toLowerCase().includes("mp3")))?.url||`https://ice1.somafm.com/${target.id}-128-mp3`;audio.load()}
- try{const Ctx=window.AudioContext||((window as any).webkitAudioContext as typeof AudioContext);if(Ctx){if(!contextRef.current)contextRef.current=new Ctx();const ctx=contextRef.current;if(ctx.state==="suspended")await ctx.resume();if(!sourceRef.current){sourceRef.current=ctx.createMediaElementSource(audio);const node=ctx.createAnalyser();node.fftSize=2048;node.smoothingTimeConstant=.82;sourceRef.current.connect(node);node.connect(ctx.destination);setAnalyser(node)}}await audio.play();setPlaying(true);setLoading(false);if(metaTimer.current)window.clearInterval(metaTimer.current);void refreshMetadata(target.id);metaTimer.current=window.setInterval(()=>void refreshMetadata(target.id),30000)}catch(e){setLoading(false);setPlaying(false);setError(e instanceof Error?e.message:"Stream konnte nicht gestartet werden.")}},[station,stations,refreshMetadata]);
+ const resolveStreamUrl=useCallback(async(target:Station)=>{ 
+  const playlist=target.playlists?.filter(p=>p.url&&p.format?.toLowerCase()==="mp3").sort((a,b)=>{const rank=(q?:string)=>q==="highest"?3:q==="high"?2:q==="low"?1:0;return rank(b.quality)-rank(a.quality)})[0];
+  if(playlist?.url){
+   try{
+    const response=await fetch(playlist.url,{cache:"no-store"});
+    if(response.ok){
+     const body=await response.text();
+     const match=body.match(/^File\\d+=(https?:\\/\\/[^\\s\\r\\n]+)/im);
+     if(match?.[1])return match[1].trim();
+    }
+   }catch{/* Fall back to a direct SomaFM stream below. */}
+  }
+  return `https://ice1.somafm.com/${target.id}-128-mp3`;
+ },[]);
+ const play=useCallback(async(next?:Station)=>{const target=next||station||stations[0];if(!target)return;const audio=audioRef.current;if(!audio)return;setError("");const changing=!!next||target.id!==station?.id;if(changing){setStation(target);setTrack("Connecting to stream…");setArtist(target.title);setLoading(true);audio.pause();audio.crossOrigin="anonymous";audio.removeAttribute("src");audio.load()}
+ try{const streamUrl=changing?await resolveStreamUrl(target):audio.currentSrc||audio.src;if(!streamUrl)throw new Error("Für diesen Sender wurde keine Stream-Adresse gefunden.");if(audio.src!==streamUrl){audio.src=streamUrl;audio.load()}const Ctx=window.AudioContext||((window as any).webkitAudioContext as typeof AudioContext);if(Ctx){if(!contextRef.current)contextRef.current=new Ctx();const ctx=contextRef.current;if(ctx.state==="suspended")await ctx.resume();if(!sourceRef.current){sourceRef.current=ctx.createMediaElementSource(audio);const node=ctx.createAnalyser();node.fftSize=2048;node.smoothingTimeConstant=.82;sourceRef.current.connect(node);node.connect(ctx.destination);setAnalyser(node)}}await audio.play();setPlaying(true);setLoading(false);if(metaTimer.current)window.clearInterval(metaTimer.current);void refreshMetadata(target.id);metaTimer.current=window.setInterval(()=>void refreshMetadata(target.id),30000)}catch(e){setLoading(false);setPlaying(false);setError(e instanceof Error?e.message:"Stream konnte nicht gestartet werden.")}},[station,stations,refreshMetadata,resolveStreamUrl]);
  const pause=useCallback(()=>{audioRef.current?.pause();setPlaying(false)},[]);
  const setVolume=useCallback((v:number)=>setVolumeState(Math.max(0,Math.min(1,v))),[]);
  const toggleFavorite=useCallback((id:string)=>setFavorites(v=>v.includes(id)?v.filter(x=>x!==id):[...v,id]),[]);
