@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Clock3, GitBranch, Info, Play, RotateCcw, Workflow, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleHelp, Info, Play, RotateCcw, Workflow } from "lucide-react";
 
 type NodeKind = "event" | "task" | "user" | "gateway" | "timer" | "error";
 type ProcessNode = { id: string; x: number; y: number; kind: NodeKind; title: string; subtitle: string; detail: string; expression?: string };
