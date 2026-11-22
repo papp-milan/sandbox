@@ -15,7 +15,7 @@
 
 ---
 
-Sandbox is a personal technical playground for exploring ideas through interactive software. It brings together visual experiments, weather data, games and audio in one responsive web application.
+Sandbox is a personal technical playground for exploring ideas through interactive software. It brings together visual experiments, weather data, games, audio and interactive workflow modelling in one responsive web application.
 
 The project is intentionally evolutionary: experiments can be small and independent, while the platform stays straightforward to run, understand and extend.
 
