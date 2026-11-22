@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, GitBranch, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves } from "lucide-react";
+import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, GitBranch, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves, Workflow } from "lucide-react";
 import { VisualLab } from "./components/visual-lab/VisualLab";
 import { GamesLab } from "./components/games-lab/GamesLab";
 import { AuditoryLab, GlobalMiniPlayer } from "./components/auditory-lab/AuditoryLab";
 import { AudioProvider } from "./components/auditory-lab/AudioProvider";
 import { AboutPage } from "./components/AboutPage";
 import { RoadmapPage } from "./components/RoadmapPage";
+import { WorkflowLab } from "./components/WorkflowLab";
 
 const labs = [
   { id: "01", title: "Visual Lab", description: "Explore mathematical surfaces, 3D scenes and interactive graphics.", icon: Orbit, path: "/visual-lab" },
@@ -14,6 +15,7 @@ const labs = [
   { id: "04", title: "AI Lab", description: "A space for models, agents, prompts and autonomous workflows.", icon: FlaskConical },
   { id: "05", title: "Games Lab", description: "Play strategy games against bots that analyze, learn and think ahead.", icon: BrainCircuit, path: "/games-lab" },
   { id: "06", title: "Auditory Lab", description: "Listen to independent radio and explore sound in real time.", icon: AudioLines, path: "/auditory-lab" },
+  { id: "07", title: "Workflow Lab", description: "Model business processes with BPMN, gateways and events.", icon: Workflow, path: "/workflow-lab" },
 ];
 export function navigate(path: string) {
   const target = path.startsWith("/") ? path : `/${path}`;
@@ -35,6 +37,7 @@ function AppContent() {
   if (path === "/auditory-lab") return <AuditoryLab onBack={() => navigate("/")} />;
   if (path === "/about") return <AboutPage onBack={() => navigate("/")} />;
   if (path === "/roadmap") return <RoadmapPage onBack={() => navigate("/")} />;
+  if (path === "/workflow-lab") return <WorkflowLab onBack={() => navigate("/")} />;
   return (
     <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <aside className="sidebar">
@@ -58,16 +61,10 @@ function AppContent() {
           <a className="nav-item muted" href="/ai-lab" title="AI Lab"><FlaskConical size={16} /><span>AI Lab</span></a>
           <a className="nav-item" href="/games-lab" title="Games Lab" onClick={e => { e.preventDefault(); navigate("/games-lab"); }}><BrainCircuit size={16} /><span>Games Lab</span></a>
           <a className="nav-item" href="/auditory-lab" title="Auditory Lab" onClick={e => { e.preventDefault(); navigate("/auditory-lab"); }}><AudioLines size={16} /><span>Auditory Lab</span></a>
+          <a className="nav-item" href="/workflow-lab" title="Workflow Lab" onClick={e => { e.preventDefault(); navigate("/workflow-lab"); }}><Workflow size={16} /><span>Workflow Lab</span></a>
         </div>
         <div className="sidebar-toggle-row">
-          <button
-            className="sidebar-toggle"
-            type="button"
-            onClick={() => setSidebarCollapsed(value => !value)}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-expanded={!sidebarCollapsed}
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
+          <button className="sidebar-toggle" type="button" onClick={() => setSidebarCollapsed(value => !value)} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!sidebarCollapsed} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
             {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
           </button>
         </div>
@@ -86,7 +83,6 @@ function AppContent() {
             ))}
           </div>
         </section>
-
       </main>
     </div>
   );
