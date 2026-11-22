@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves } from "lucide-react";
+import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, GitBranch, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves } from "lucide-react";
 import { VisualLab } from "./components/visual-lab/VisualLab";
 import { GamesLab } from "./components/games-lab/GamesLab";
 import { AuditoryLab, GlobalMiniPlayer } from "./components/auditory-lab/AuditoryLab";
 import { AudioProvider } from "./components/auditory-lab/AudioProvider";
 import { AboutPage } from "./components/AboutPage";
+import { RoadmapPage } from "./components/RoadmapPage";
 
 const labs = [
   { id: "01", title: "Visual Lab", description: "Explore mathematical surfaces, 3D scenes and interactive graphics.", icon: Orbit, path: "/visual-lab" },
@@ -13,12 +14,6 @@ const labs = [
   { id: "04", title: "AI Lab", description: "A space for models, agents, prompts and autonomous workflows.", icon: FlaskConical },
   { id: "05", title: "Games Lab", description: "Play strategy games against bots that analyze, learn and think ahead.", icon: BrainCircuit, path: "/games-lab" },
   { id: "06", title: "Auditory Lab", description: "Listen to independent radio and explore sound in real time.", icon: AudioLines, path: "/auditory-lab" },
-];
-const ideas = [
-  ["01", "Algorithm Visualizer", "ALGORITHMS"],
-  ["02", "Audio Lab", "AUDIO / SIGNALS"],
-  ["03", "Workflow Lab", "PROCESS DESIGN"],
-  ["04", "Backend Lab", "JAVA / SPRING"],
 ];
 export function navigate(path: string) {
   const target = path.startsWith("/") ? path : `/${path}`;
@@ -39,6 +34,7 @@ function AppContent() {
   if (path === "/visual-lab") return <VisualLab onBack={() => navigate("/")} />;
   if (path === "/auditory-lab") return <AuditoryLab onBack={() => navigate("/")} />;
   if (path === "/about") return <AboutPage onBack={() => navigate("/")} />;
+  if (path === "/roadmap") return <RoadmapPage onBack={() => navigate("/")} />;
   return (
     <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <aside className="sidebar">
@@ -51,6 +47,7 @@ function AppContent() {
         <div className="sidebar-section">
           <p className="eyebrow">WORKSPACE</p>
           <a className="nav-item active" href="/" title="Overview" onClick={e => { e.preventDefault(); navigate("/"); }}><Grid2X2 size={16} /><span>Overview</span></a>
+          <a className="nav-item" href="/roadmap" title="Roadmap" onClick={e => { e.preventDefault(); navigate("/roadmap"); }}><GitBranch size={16} /><span>Roadmap</span></a>
           <a className="nav-item" href="/about" title="About" onClick={e => { e.preventDefault(); navigate("/about"); }}><Info size={16} /><span>About</span></a>
         </div>
         <div className="sidebar-section">
@@ -89,14 +86,7 @@ function AppContent() {
             ))}
           </div>
         </section>
-        <section className="section-block roadmap" id="roadmap">
-          <div className="section-heading"><div><h2>Coming into focus</h2></div><span className="section-count">IDEA BACKLOG</span></div>
-          <div className="upcoming-list">
-            {ideas.map(([id, name, category]) => (
-              <div className="upcoming-item" key={id}><span className="upcoming-index">{id}</span><span className="upcoming-name">{name}</span><span className="upcoming-category">{category}</span><span className="upcoming-plus">+</span></div>
-            ))}
-          </div>
-        </section>
+
       </main>
     </div>
   );
