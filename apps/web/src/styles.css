@@ -2284,3 +2284,41 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .workflow-scenarios button, .workflow-player-actions button { font-size: 10px; }
   .workflow-legend { font-size: 9px; }
 }
+
+
+/* Visual Lab — deliberately readable at 100% browser zoom.
+   Scoped to the actual class names used by VisualLab.tsx. */
+.visual-lab .visual-eyebrow { font-size: 11px; color: #999; }
+.visual-lab .visual-top-meta,
+.visual-lab .visual-coordinate { font-size: 11px; color: #999; }
+.visual-lab .visual-subtitle { font-size: 16px; line-height: 1.65; color: #aaa; }
+
+.visual-lab .control-label { font-size: 11px; color: #c0c0c0; }
+.visual-lab .function-form label { font-size: 13px; color: #bdbdbd; }
+.visual-lab .function-form textarea { font-size: 15px; line-height: 1.6; }
+.visual-lab .function-form .apply-button { font-size: 14px; }
+.visual-lab .function-hint,
+.visual-lab .function-error { font-size: 13px; line-height: 1.65; color: #aaa; }
+
+.visual-lab .preset-button { gap: 6px; padding: 12px; }
+.visual-lab .preset-button span { font-size: 15px; line-height: 1.35; }
+.visual-lab .preset-button small { font-size: 13px; line-height: 1.5; color: #aaa; }
+
+.visual-lab .range-control { font-size: 14px; line-height: 1.4; color: #c0c0c0; }
+.visual-lab .range-control output { font-size: 13px; color: #eee; }
+.visual-lab .range-control input { min-height: 22px; }
+
+.visual-lab .stage-toolbar { font-size: 12px; color: #aaa; }
+.visual-lab .render-modes button { font-size: 11px; padding: 8px 10px; }
+.visual-lab .canvas-hint { font-size: 11px; color: #aaa; }
+.visual-lab .stage-footer,
+.visual-lab .visual-footer { font-size: 11px; color: #999; }
+
+@media (max-width: 700px) {
+  .visual-lab .visual-subtitle { font-size: 15px; }
+  .visual-lab .function-hint,
+  .visual-lab .function-error { font-size: 13px; }
+  .visual-lab .preset-button span { font-size: 14px; }
+  .visual-lab .preset-button small { font-size: 12px; }
+  .visual-lab .range-control { font-size: 13px; }
+}
