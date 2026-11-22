@@ -149,7 +149,7 @@ export function AuditoryLab({onBack}: { onBack: () => void }) {
     const genres = useMemo(() => ["All", ...Array.from(new Set(stations.map(s => s.genre))).sort()], [stations]);
     const favoriteKeys = useMemo(() => new Set(favorites.map(value => value.toLocaleLowerCase().replace(/[^a-z0-9]/g, ""))), [favorites]);
     const isFavorite = (s: Station) => favoriteKeys.has(s.id.toLocaleLowerCase().replace(/[^a-z0-9]/g, "")) || favoriteKeys.has(s.title.toLocaleLowerCase().replace(/[^a-z0-9]/g, ""));
-    const filtered = useMemo(() => stations.filter(s => (genre === "All" || (genre !== "Favorites" && s.genre.split("|").some(tag => tag.trim().toLowerCase() === genre.toLowerCase()))) && (genre !== "Favorites" || isFavorite(s)) && (s.title + " " + s.genre + " " + s.description).toLowerCase().includes(query.toLowerCase())), [stations, genre, query, favoriteKeys]);
+    const filtered = useMemo(() => stations.filter(s => (genre === "All" || genre === "Favorites" || s.genre.split("|").some(tag => tag.trim().toLowerCase() === genre.toLowerCase())) && (genre !== "Favorites" || isFavorite(s)) && (s.title + " " + s.genre + " " + s.description).toLowerCase().includes(query.toLowerCase())), [stations, genre, query, favoriteKeys]);
     const currentStation = station || curated[0];
     const choose = (s: Station) => {
         void play(s);
