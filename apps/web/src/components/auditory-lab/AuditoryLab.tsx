@@ -284,9 +284,9 @@ export function GlobalMiniPlayer({onOpen}: { onOpen: () => void }) {
     const {station, playing, loading, track, artist, volume, muted, pause, play, setVolume, toggleMute} = useAudio();
     const [route, setRoute] = useState(window.location.pathname);
     useEffect(() => {
-        const update = () => setRoute(window.location.hash);
-        window.addEventListener("hashchange", update);
-        return () => window.removeEventListener("hashchange", update)
+        const update = () => setRoute(window.location.pathname);
+        window.addEventListener("popstate", update);
+        return () => window.removeEventListener("popstate", update)
     }, []);
     if (!station || !playing || route === "/auditory-lab") return null;
     return <aside className="auditory-mini-player">
