@@ -54,8 +54,8 @@ function AppContent() {
           <a className="nav-item muted" href="/data-lab"><Grid2X2 size={16} /> Data Lab</a>
           <a className="nav-item muted" href="/event-lab"><Waves size={16} /> Event Lab</a>
           <a className="nav-item muted" href="/ai-lab"><FlaskConical size={16} /> AI Lab</a>
-          <a className="nav-item" href="/games-lab" onClick={e => { e.preventDefault(); navigate("/games-lab"); }}><BrainCircuit size={16} /> Games Lab <span className="nav-index">NEW</span></a>
-          <a className="nav-item" href="/auditory-lab" onClick={e => { e.preventDefault(); navigate("/auditory-lab"); }}><AudioLines size={16} /> Auditory Lab <span className="nav-index">NEW</span></a>
+          <a className="nav-item" href="/games-lab" onClick={e => { e.preventDefault(); navigate("/games-lab"); }}><BrainCircuit size={16} /> Games Lab</a>
+          <a className="nav-item" href="/auditory-lab" onClick={e => { e.preventDefault(); navigate("/auditory-lab"); }}><AudioLines size={16} /> Auditory Lab</a>
         </div>
       </aside>
       <main className="main-content" id="overview">
