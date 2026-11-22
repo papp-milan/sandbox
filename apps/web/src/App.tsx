@@ -47,16 +47,6 @@ function AppContent() {
             <img src="/open-frame.svg" alt="" className="h-10 w-10" />
             <span className="brand-name">SANDBOX</span>
           </a>
-          <button
-            className="sidebar-toggle"
-            type="button"
-            onClick={() => setSidebarCollapsed(value => !value)}
-            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-expanded={!sidebarCollapsed}
-            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-          </button>
         </div>
         <div className="sidebar-section">
           <p className="eyebrow">WORKSPACE</p>
@@ -71,6 +61,18 @@ function AppContent() {
           <a className="nav-item muted" href="/ai-lab" title="AI Lab"><FlaskConical size={16} /><span>AI Lab</span></a>
           <a className="nav-item" href="/games-lab" title="Games Lab" onClick={e => { e.preventDefault(); navigate("/games-lab"); }}><BrainCircuit size={16} /><span>Games Lab</span></a>
           <a className="nav-item" href="/auditory-lab" title="Auditory Lab" onClick={e => { e.preventDefault(); navigate("/auditory-lab"); }}><AudioLines size={16} /><span>Auditory Lab</span></a>
+        </div>
+        <div className="sidebar-toggle-row">
+          <button
+            className="sidebar-toggle"
+            type="button"
+            onClick={() => setSidebarCollapsed(value => !value)}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!sidebarCollapsed}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </button>
         </div>
       </aside>
       <main className="main-content" id="overview">

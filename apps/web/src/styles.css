@@ -1802,3 +1802,28 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     transition: none;
   }
 }
+
+
+/* Keep the sidebar collapse control at the lower-right edge. */
+.sidebar-toggle-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: auto;
+  padding-top: 20px;
+}
+.sidebar-toggle-row .sidebar-toggle {
+  margin: 0;
+}
+.app-shell.sidebar-collapsed .sidebar-toggle-row {
+  justify-content: flex-end;
+}
+@media (max-width: 650px) {
+  .sidebar-toggle-row {
+    padding-top: 14px;
+    padding-bottom: 2px;
+  }
+  .app-shell.sidebar-collapsed .sidebar-toggle-row {
+    padding-top: 0;
+  }
+}
