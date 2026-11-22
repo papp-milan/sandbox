@@ -79,7 +79,7 @@ export function WorkflowLab({ onBack }: { onBack: () => void }) {
   const retreat = () => { setStep(value => Math.max(0, value - 1)); setSelectedId(scenario.path[Math.max(step - 1, 0)]); };
 
   return (
-    <main className="workflow-lab">
+    <main className="visual-lab workflow-lab">
       <header className="visual-topbar">
         <button className="back-link" onClick={onBack}><ArrowLeft size={15} /> Sandbox</button>
         <div className="visual-top-meta"><span>WORKSPACE</span><i /> WORKFLOW LAB</div>
