@@ -48,7 +48,9 @@ export function AuditoryLab({onBack}:{onBack:()=>void}){
 }
 export function GlobalMiniPlayer({onOpen}:{onOpen:()=>void}){
  const {station,playing,loading,track,artist,volume,muted,pause,play,setVolume,toggleMute}=useAudio();
- if(!station||!playing)return null;
+ const [route,setRoute]=useState(window.location.hash);
+ useEffect(()=>{const update=()=>setRoute(window.location.hash);window.addEventListener("hashchange",update);return()=>window.removeEventListener("hashchange",update)},[]);
+ if(!station||!playing||route==="#/auditory-lab")return null;
  return <aside className="auditory-mini-player"><button className="mini-player-info" onClick={onOpen}><span className="mini-player-wave"><i/><i/><i/><i/><i/></span><span><strong>{station.title}</strong><small>{track} · {artist}</small></span></button><button className="mini-player-control" onClick={()=>playing?pause():void play()} aria-label={playing?"Pause":"Play"}>{loading?"…":<Pause size={17} fill="currentColor"/>}</button><button className="mini-player-control mini-volume-toggle" onClick={toggleMute} aria-label="Toggle mute">{muted||volume===0?<VolumeX size={16}/>:<Volume2 size={16}/>}</button><input className="mini-volume" aria-label="Volume" type="range" min="0" max="1" step=".01" value={muted?0:volume} onChange={e=>setVolume(Number(e.target.value))}/><button className="mini-player-close" onClick={onOpen} aria-label="Open Auditory Lab"><Maximize2 size={15}/></button>
  </aside>;
 }
