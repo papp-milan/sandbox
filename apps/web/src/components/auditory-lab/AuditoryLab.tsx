@@ -147,7 +147,9 @@ export function AuditoryLab({onBack}: { onBack: () => void }) {
     const curatedIds = ["groovesalad", "dronezone", "defcon", "deepspaceone", "lush", "secretagent", "fluid", "cliqhop"];
     const curated = useMemo(() => curatedIds.map(id => stations.find(s => s.id === id)).filter(Boolean) as Station[], [stations]);
     const genres = useMemo(() => ["All", ...Array.from(new Set(stations.map(s => s.genre))).sort()], [stations]);
-    const filtered = useMemo(() => stations.filter(s => (genre === "All" || (genre !== "Favorites" && s.genre === genre)) && (genre !== "Favorites" || favorites.includes(s.id)) && (s.title + " " + s.genre + " " + s.description).toLowerCase().includes(query.toLowerCase())), [stations, genre, query, favorites]);
+    const favoriteKeys = useMemo(() => new Set(favorites.map(value => value.toLocaleLowerCase().replace(/[^a-z0-9]/g, ""))), [favorites]);
+    const isFavorite = (s: Station) => favoriteKeys.has(s.id.toLocaleLowerCase().replace(/[^a-z0-9]/g, "")) || favoriteKeys.has(s.title.toLocaleLowerCase().replace(/[^a-z0-9]/g, ""));
+    const filtered = useMemo(() => stations.filter(s => (genre === "All" || (genre !== "Favorites" && s.genre.split("|").some(tag => tag.trim().toLowerCase() === genre.toLowerCase()))) && (genre !== "Favorites" || isFavorite(s)) && (s.title + " " + s.genre + " " + s.description).toLowerCase().includes(query.toLowerCase())), [stations, genre, query, favoriteKeys]);
     const currentStation = station || curated[0];
     const choose = (s: Station) => {
         void play(s);
@@ -216,7 +218,7 @@ export function AuditoryLab({onBack}: { onBack: () => void }) {
                 </div>
                 <div className="auditory-curated-grid">{curated.map(s => <StationButton key={s.id} item={s}
                                                                                         active={station?.id === s.id}
-                                                                                        favorite={favorites.includes(s.id)}
+                                                                                        favorite={isFavorite(s)}
                                                                                         onFavorite={() => toggleFavorite(s.id)}
                                                                                         onPlay={() => choose(s)}/>)}</div>
             </section>
@@ -280,13 +282,13 @@ export function AuditoryLab({onBack}: { onBack: () => void }) {
 
 export function GlobalMiniPlayer({onOpen}: { onOpen: () => void }) {
     const {station, playing, loading, track, artist, volume, muted, pause, play, setVolume, toggleMute} = useAudio();
-    const [route, setRoute] = useState(window.location.hash);
+    const [route, setRoute] = useState(window.location.pathname);
     useEffect(() => {
         const update = () => setRoute(window.location.hash);
         window.addEventListener("hashchange", update);
         return () => window.removeEventListener("hashchange", update)
     }, []);
-    if (!station || !playing || route === "#/auditory-lab") return null;
+    if (!station || !playing || route === "/auditory-lab") return null;
     return <aside className="auditory-mini-player">
         <button className="mini-player-info" onClick={onOpen}><span
             className="mini-player-wave"><i/><i/><i/><i/><i/></span><span><strong>{station.title}</strong><small>{track} · {artist}</small></span>
