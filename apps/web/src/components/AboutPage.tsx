@@ -61,8 +61,10 @@ const groups: Group[] = [
 
 const palette = [
   { name: "Spanish Orange", hex: "#E87535", role: "Primary accent · active states and key actions" },
-  { name: "Orange Light", hex: "#F18A4B", role: "Accent highlight and hover" },
-  { name: "Orange Soft", hex: "#F18A4B", role: "Warm accent tint" },
+  { name: "Orange Highlight", hex: "#F18A4B", role: "Lighter accent highlight" },
+  { name: "Copper", hex: "#C87945", role: "Secondary warm accent" },
+  { name: "Weather Blue", hex: "#62B2E5", role: "Weather data and radar accents" },
+  { name: "Warm Rose", hex: "#D58B72", role: "Subtle warm visualization accent" },
   { name: "Canvas", hex: "#0A0A0A", role: "Main application background" },
   { name: "Surface", hex: "#111111", role: "Raised surfaces and hover backgrounds" },
   { name: "Surface Deep", hex: "#171412", role: "Warm dark surface" },
