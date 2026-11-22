@@ -1,4 +1,4 @@
-import { ArrowUpRight, AudioLines, CloudSun, Code2, Cpu, Database, ExternalLink, Layers3, Radio, Waves } from "lucide-react";
+import { ArrowUpRight, CloudSun, Code2, Cpu, Database, ExternalLink, Layers3 } from "lucide-react";
 
 type Resource = { name: string; role: string; url: string; note?: string };
 type Group = { title: string; intro: string; icon: typeof Code2; items: Resource[] };
