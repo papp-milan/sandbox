@@ -58,6 +58,19 @@ const groups: Group[] = [
   },
 ];
 
+
+const palette = [
+  { name: "Spanish Orange", hex: "#E87535", role: "Primary accent · active states and key actions" },
+  { name: "Orange Light", hex: "#F18A4B", role: "Accent highlight and hover" },
+  { name: "Orange Soft", hex: "#F18A4B", role: "Warm accent tint" },
+  { name: "Canvas", hex: "#0A0A0A", role: "Main application background" },
+  { name: "Surface", hex: "#111111", role: "Raised surfaces and hover backgrounds" },
+  { name: "Surface Deep", hex: "#171412", role: "Warm dark surface" },
+  { name: "Border", hex: "#292929", role: "Subtle dividers and outlines" },
+  { name: "Text", hex: "#EDEDED", role: "Primary text" },
+  { name: "Muted", hex: "#777777", role: "Secondary text and metadata" },
+];
+
 const principles = [
   ["Browser-first", "External data and media are fetched by the frontend where practical. No audio proxy or radio rebroadcasting."],
   ["Small by default", "Infrastructure is introduced when an experiment needs it, not pre-emptively."],
@@ -105,6 +118,27 @@ export function AboutPage({ onBack }: { onBack: () => void }) {
       <div className="about-groups">
         {groups.map(group => <ResourceGroup key={group.title} group={group} />)}
       </div>
+
+      <section className="about-palette">
+        <div className="about-palette-heading">
+          <p className="visual-eyebrow">VISUAL SYSTEM</p>
+          <h2>Color palette</h2>
+          <p>The core interface colors used across Sandbox. Hex values are shown for easy reuse.</p>
+        </div>
+        <div className="about-palette-grid">
+          {palette.map(color => (
+            <div className="about-color" key={color.hex + color.name}>
+              <span className="about-color-swatch" style={{ backgroundColor: color.hex }} />
+              <div className="about-color-details">
+                <strong>{color.name}</strong>
+                <code>{color.hex}</code>
+                <small>{color.role}</small>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="about-principles">
         <div className="about-principles-heading"><p className="visual-eyebrow">ENGINEERING NOTES</p><h2>How Sandbox is put together</h2></div>
         <div className="about-principle-list">
