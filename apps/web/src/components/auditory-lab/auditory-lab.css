@@ -798,3 +798,24 @@
 @media (prefers-reduced-motion:reduce) {
  .mini-player-dismiss-track span { animation:none; transform:scaleX(0); }
 }
+
+
+/* Readability pass — auditory controls, station metadata and player labels. */
+.auditory-back { font-size: 14px; }
+.auditory-brand, .auditory-live, .auditory-live-label,
+.auditory-signal-status, .auditory-kicker { font-size: 10px; }
+.auditory-tabs button { font-size: 13px; }
+.auditory-description { font-size: 14px; line-height: 1.65; }
+.auditory-play { font-size: 11px; }
+.auditory-visual-caption, .auditory-volume,
+.auditory-expand, .auditory-viz-panel-head,
+.auditory-viz-scale, .auditory-footer { font-size: 10px !important; }
+.auditory-section-head > button { font-size: 10px; }
+.station-copy strong { font-size: 14px; }
+.station-copy small { font-size: 12px; }
+.auditory-viz-switch button, .auditory-explorer-tools > button,
+.auditory-explorer-tools select { font-size: 12px; }
+.auditory-hint, .auditory-error, .auditory-empty { font-size: 12px; line-height: 1.6; }
+.auditory-search input { font-size: 13px; }
+.mini-player-info strong { font-size: 13px; }
+.mini-player-info small { font-size: 11px; }

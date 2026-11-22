@@ -2171,3 +2171,116 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .workflow-player-actions button { font-size: 8px; }
   .workflow-concept-grid p { font-size: 12px; }
 }
+
+
+/* --------------------------------------------------------------------------
+   Readability pass — consistent type scale across every workspace and lab.
+   Keep metadata compact, but never let explanatory or interactive text fall
+   below a comfortable size at 100% browser zoom.
+   -------------------------------------------------------------------------- */
+:root { --type-micro: 10px; --type-label: 12px; --type-body: 14px; }
+.visual-eyebrow, .eyebrow, .visual-top-meta, .visual-coordinate,
+.control-label, .stage-toolbar, .stage-footer, .visual-footer,
+.weather-scene-meta, .weather-side-head, .weather-loading,
+.intro-coordinates, .workflow-heading-mark span, .workflow-stats span,
+.workflow-toolbar, .workflow-toggle, .workflow-legend,
+.workflow-step-copy > span, .workflow-detail-status,
+.workflow-expression span, .workflow-detail-foot,
+.workflow-current-meta, .concept-index, .workflow-camunda-note > a,
+.workflow-back-top, .about-version, .about-count, .about-resource-role,
+.about-footer, .roadmap-progress-copy small, .roadmap-status,
+.roadmap-section-heading > span, .roadmap-lab-card-foot,
+.game-card-top, .game-card-foot, .games-note, .fleet-legend,
+.system-state, .section-count, .nav-index, .sidebar-version {
+  font-size: var(--type-micro);
+}
+
+.visual-top-meta, .visual-eyebrow, .visual-coordinate,
+.control-label, .stage-toolbar, .stage-footer, .visual-footer,
+.weather-scene-meta, .weather-side-head, .workflow-toolbar,
+.workflow-toggle, .workflow-legend, .workflow-step-copy > span,
+.workflow-detail-status, .workflow-expression span,
+.workflow-detail-foot, .workflow-current-meta, .concept-index,
+.workflow-camunda-note > a, .workflow-back-top,
+.about-resource-role, .about-footer, .roadmap-progress-copy small,
+.roadmap-status, .roadmap-section-heading > span,
+.auditory-live, .auditory-live-label, .auditory-signal-status {
+  letter-spacing: .06em;
+}
+
+.visual-subtitle, .intro-copy { font-size: 15px; line-height: 1.65; }
+.visual-heading h1 { font-size: clamp(44px, 4.3vw, 72px); }
+.function-form label { font-size: 12px; }
+.function-form textarea { font-size: 14px; line-height: 1.6; }
+.function-hint, .function-error { font-size: 12px; line-height: 1.6; color: #999; }
+.preset-button span { font-size: 14px; }
+.preset-button small { font-size: 12px; color: #999; line-height: 1.45; }
+.range-control { font-size: 13px; }
+.range-control output { font-size: 12px; }
+.render-modes button { font-size: 10px; }
+.canvas-hint { font-size: 10px; color: #999; }
+.stage-toolbar, .stage-footer, .visual-footer { font-size: 10px; }
+.visual-coordinate { font-size: 10px; }
+
+.weather-condition { font-size: 14px; }
+.weather-current small, .weather-metric span, .sun-cycle span,
+.hour-card span, .hour-card small, .timeline-labels,
+.weather-hero-kicker, .weather-hero-feels, .weather-hero-location,
+.weather-hero-location span, .forecast-heading > span,
+.weather-info-card p, .modal-metrics div, .weather-loading {
+  font-size: 11px;
+}
+.weather-metric strong, .sun-cycle strong { font-size: 16px; }
+.hour-card strong { font-size: 15px; }
+.weather-info-card strong { font-size: 13px; }
+
+.game-card h2 { font-size: 24px; }
+.game-card p, .game-info > p:not(.visual-eyebrow), .game-info p { font-size: 14px; line-height: 1.65; }
+.game-action, .game-secondary { font-size: 13px; }
+.game-card-top, .game-card-foot, .games-note { font-size: 10px; }
+.fleet-legend { font-size: 10px; }
+
+.lab-card p { font-size: 14px; line-height: 1.6; }
+.lab-card h3, .lab-card-heading h3 { font-size: 23px; }
+.nav-item, .back-link { font-size: 14px; }
+.section-heading h2 { font-size: 25px; }
+
+.about-intro-strip p { font-size: 14px; line-height: 1.7; }
+.about-group-heading h2 { font-size: 19px; }
+.about-group-heading p { font-size: 12px; }
+.about-resource-main strong { font-size: 14px; }
+.about-resource-main small { font-size: 12px; line-height: 1.5; }
+.about-resource-role { font-size: 10px; }
+.about-principle strong { font-size: 14px; }
+.about-principle p { font-size: 13px; line-height: 1.6; }
+.about-footer { font-size: 10px; }
+
+.roadmap-item-title { font-size: 14px; }
+.roadmap-item-description, .roadmap-lab-card-content p,
+.roadmap-principle p { font-size: 14px; line-height: 1.65; }
+.roadmap-status, .roadmap-section-heading > span { font-size: 10px; }
+
+.workflow-intro-strip p, .workflow-scenario-bar p,
+.workflow-detail-card > p, .workflow-current-card > p,
+.workflow-learning-heading > p:last-child,
+.workflow-concept-grid p, .workflow-camunda-note > p {
+  font-size: 14px;
+  line-height: 1.7;
+}
+.workflow-current-card > p { font-size: 13px; }
+.workflow-concept-grid h3 { font-size: 18px; }
+.workflow-scenarios button, .workflow-player-actions button { font-size: 11px; }
+.workflow-node-title { font-size: 16px; }
+.workflow-node-subtitle, .workflow-condition-tags text { font-size: 12px; }
+.workflow-edge-label { font-size: 14px; }
+
+@media (max-width: 700px) {
+  .visual-heading h1 { font-size: clamp(38px, 9vw, 54px); }
+  .function-hint, .preset-button small { font-size: 12px; }
+  .stage-footer, .visual-footer { font-size: 9px; }
+  .workflow-intro-strip p, .workflow-detail-card > p,
+  .workflow-current-card > p, .workflow-learning-heading > p:last-child,
+  .workflow-concept-grid p, .workflow-camunda-note > p { font-size: 13px; }
+  .workflow-scenarios button, .workflow-player-actions button { font-size: 10px; }
+  .workflow-legend { font-size: 9px; }
+}
