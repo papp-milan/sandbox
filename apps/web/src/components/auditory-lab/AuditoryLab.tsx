@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, AudioLines, ChevronDown, Heart, ListMusic, Maximize2, Pause, Play, Radio, Search, SkipForward, Volume2, VolumeX, Waves, X } from "lucide-react";
+import "./auditory-lab.css";
+import { ArrowLeft, AudioLines, ChevronDown, Heart, ListMusic, Maximize2, Pause, Play, Radio, Search, Volume2, VolumeX, Waves } from "lucide-react";
 import { useAudio, type Station } from "./AudioProvider";
 
 type View="radio"|"visualizer"|"explorer";
 type Viz="spectrum"|"waveform"|"circular"|"spectrogram";
 function AudioCanvas({mode,analyser}:{mode:Viz;analyser:AnalyserNode|null}){
  const ref=useRef<HTMLCanvasElement>(null);
- useEffect(()=>{const canvas=ref.current;if(!canvas)return;const ctx=canvas.getContext("2d");if(!ctx)return;let frame=0,raf=0;const bins=new Uint8Array(analyser?.frequencyBinCount||1024),wave=new Uint8Array(analyser?.fftSize||2048);const draw=()=>{const w=canvas.clientWidth,h=canvas.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);if(analyser){analyser.getByteFrequencyData(bins);analyser.getByteTimeDomainData(wave)}else{bins.fill(0);wave.fill(128)}
+ useEffect(()=>{const canvas=ref.current;if(!canvas)return;const ctx=canvas.getContext("2d");if(!ctx)return;let raf=0;const bins=new Uint8Array(analyser?.frequencyBinCount||1024),wave=new Uint8Array(analyser?.fftSize||2048);const draw=()=>{const w=canvas.clientWidth,h=canvas.clientHeight,dpr=Math.min(window.devicePixelRatio||1,2);if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr)}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);if(analyser){analyser.getByteFrequencyData(bins);analyser.getByteTimeDomainData(wave)}else{bins.fill(0);wave.fill(128)}
  const accent="#e87535";ctx.lineWidth=1.5;ctx.strokeStyle=accent;ctx.fillStyle=accent;
  if(mode==="waveform"){ctx.beginPath();for(let i=0;i<wave.length;i++){const x=i/(wave.length-1)*w,y=wave[i]/255*h;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.stroke();ctx.globalAlpha=.12;ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.fill();ctx.globalAlpha=1}
  else if(mode==="circular"){const cx=w/2,cy=h/2,r=Math.min(w,h)*.23;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle="#343434";ctx.stroke();for(let i=0;i<100;i++){const v=bins[Math.floor(i/100*bins.length)]/255;const a=i/100*Math.PI*2;const x1=cx+Math.cos(a)*r,y1=cy+Math.sin(a)*r,x2=cx+Math.cos(a)*(r+v*h*.23),y2=cy+Math.sin(a)*(r+v*h*.23);ctx.strokeStyle=accent;ctx.globalAlpha=.35+v*.65;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}ctx.globalAlpha=1}
@@ -19,11 +20,11 @@ function StationButton({item,onPlay,active,favorite,onFavorite}:{item:Station;on
 }
 export function AuditoryLab({onBack}:{onBack:()=>void}){
  const {stations,station,playing,loading,volume,muted,track,artist,error,analyser,favorites,play,pause,setVolume,toggleMute,toggleFavorite}=useAudio();
- const [view,setView]=useState<View>("radio"),[query,setQuery]=useState(""),[genre,setGenre]=useState("All"),[viz,setViz]=useState<Viz>("spectrum"),[expanded,setExpanded]=useState(false);
+ const [view,setView]=useState<View>("radio"),[query,setQuery]=useState(""),[genre,setGenre]=useState("All"),[viz,setViz]=useState<Viz>("spectrum");
  const curatedIds=["groovesalad","dronezone","defcon","deepspaceone","lush","secretagent","fluid","cliqhop"];
  const curated=useMemo(()=>curatedIds.map(id=>stations.find(s=>s.id===id)).filter(Boolean) as Station[],[stations]);
  const genres=useMemo(()=>["All",...Array.from(new Set(stations.map(s=>s.genre))).sort()], [stations]);
- const filtered=useMemo(()=>stations.filter(s=>(genre==="All"||s.genre===genre)&&(s.title+" "+s.genre+" "+s.description).toLowerCase().includes(query.toLowerCase())),[stations,genre,query]);
+ const filtered=useMemo(()=>stations.filter(s=>(genre==="All"||genre==="Favorites"||s.genre===genre)&&(s.title+" "+s.genre+" "+s.description).toLowerCase().includes(query.toLowerCase())),[stations,genre,query]);
  const currentStation=station||curated[0];
  const choose=(s:Station)=>{void play(s);setView("radio")};
  const toggleFullscreen=()=>{if(!document.fullscreenElement)void document.documentElement.requestFullscreen?.();else void document.exitFullscreen?.()};
