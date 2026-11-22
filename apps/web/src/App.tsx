@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves } from "lucide-react";
+import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, GitBranch, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves } from "lucide-react";
 import { VisualLab } from "./components/visual-lab/VisualLab";
 import { GamesLab } from "./components/games-lab/GamesLab";
 import { AuditoryLab, GlobalMiniPlayer } from "./components/auditory-lab/AuditoryLab";
