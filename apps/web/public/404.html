@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SANDBOX</title>
+  <script>
+    try {
+      sessionStorage.setItem("sandbox-redirect", window.location.pathname + window.location.search + window.location.hash);
+    } catch {
+      /* The app still loads at the root if session storage is unavailable. */
+    }
+    window.location.replace("/");
+  </script>
+</head>
+<body></body>
+</html>

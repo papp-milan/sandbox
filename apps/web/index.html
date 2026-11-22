@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="theme-color" content="#0a0a0a"/>
     <link rel="icon" type="image/svg+xml" href="/open-frame.svg" />
-    <title>SANDBOX</title></head>
+    <title>SANDBOX</title>
+    <script>try { const redirect = sessionStorage.getItem("sandbox-redirect"); if (redirect) { sessionStorage.removeItem("sandbox-redirect"); history.replaceState(null, "", redirect); } } catch { /* session storage may be unavailable */ }</script>
+</head>
 <body>
 <div id="root"></div>
 <script type="module" src="/src/main.tsx"></script>
