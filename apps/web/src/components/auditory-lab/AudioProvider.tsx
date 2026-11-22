@@ -29,7 +29,7 @@ export function AudioProvider({children}:{children:ReactNode}) {
     const response=await fetch(playlist.url,{cache:"no-store"});
     if(response.ok){
      const body=await response.text();
-     const match=body.match(/^File\\d+=(https?:\\/\\/[^\\s\\r\\n]+)/im);
+     const match=body.match(/^File\d+=(https?:\/\/[^\s\r\n]+)/im);
      if(match?.[1])return match[1].trim();
     }
    }catch{/* Fall back to a direct SomaFM stream below. */}
