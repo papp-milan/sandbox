@@ -2122,13 +2122,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 
-/* Workflow Lab viewport and typography refinements */
+/* Workflow Lab follows the same full-width page shell as the other labs. */
 .workflow-lab {
-  width: calc(100vw - 48px);
+  width: 100%;
   max-width: none;
-  margin: 0 24px;
-  padding: 0 clamp(28px, 4.2vw, 84px) 32px;
+  margin: 0;
+  padding: 0 clamp(28px, 4vw, 76px) 32px;
 }
+
+/* Match the shared lab typography scale at normal browser zoom. */
 .workflow-heading-mark span { font-size: 9px; }
 .workflow-intro-strip p { font-size: 14px; }
 .workflow-stats span { font-size: 9px; }
@@ -2148,7 +2150,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .workflow-expression span { font-size: 9px; }
 .workflow-expression code { font-size: 12px; }
 .workflow-detail-foot { font-size: 9px; }
-.workflow-current-card > p { font-size: 12px; }
 .workflow-current-meta { font-size: 9px; }
 .workflow-learning-heading > p:last-child { font-size: 14px; }
 .concept-index { font-size: 9px; }
@@ -2159,46 +2160,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .workflow-back-top { font-size: 9px; }
 
 @media(max-width:1000px) {
-  .workflow-lab { width: calc(100vw - 32px); margin-inline:16px; padding-inline:24px; }
+  .workflow-lab { padding-inline: 28px; }
 }
 @media(max-width:700px) {
-  .workflow-lab { width: calc(100vw - 32px); margin-inline:16px; padding:0 0 24px; }
-  .workflow-toolbar { font-size:9px; }
-  .workflow-scenarios button { font-size:9px; }
-  .workflow-scenario-bar p { font-size:11px; }
-  .workflow-legend { font-size:8px; }
-  .workflow-player-actions button { font-size:8px; }
-  .workflow-concept-grid p { font-size:12px; }
-}
-
-
-/* True viewport breakout: the workflow page must not inherit a centered parent width. */
-.workflow-lab {
-  position: relative;
-  left: 50%;
-  width: calc(100vw - 48px);
-  max-width: none;
-  margin-left: calc(-50vw + 24px);
-  margin-right: 24px;
-  padding-left: clamp(28px, 4.2vw, 84px);
-  padding-right: clamp(28px, 4.2vw, 84px);
-  box-sizing: border-box;
-}
-@media (max-width: 1000px) {
-  .workflow-lab {
-    width: calc(100vw - 32px);
-    margin-left: calc(-50vw + 16px);
-    margin-right: 16px;
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-}
-@media (max-width: 700px) {
-  .workflow-lab {
-    width: calc(100vw - 24px);
-    margin-left: calc(-50vw + 12px);
-    margin-right: 12px;
-    padding-left: 0;
-    padding-right: 0;
-  }
+  .workflow-lab { padding: 0 16px 24px; }
+  .workflow-toolbar { font-size: 9px; }
+  .workflow-scenarios button { font-size: 9px; }
+  .workflow-scenario-bar p { font-size: 11px; }
+  .workflow-legend { font-size: 8px; }
+  .workflow-player-actions button { font-size: 8px; }
+  .workflow-concept-grid p { font-size: 12px; }
 }
