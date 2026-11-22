@@ -76,9 +76,11 @@ export function AudioProvider({children}: { children: ReactNode }) {
         sourceRef = useRef<MediaElementAudioSourceNode | null>(null), metaTimer = useRef<number | undefined>(undefined);
     const [stations, setStations] = useState<Station[]>(curated), [station, setStation] = useState<Station | null>(null), [playing, setPlaying] = useState(false), [loading, setLoading] = useState(false), [volume, setVolumeState] = useState(.40), [muted, setMuted] = useState(false), [track, setTrack] = useState("Live stream"), [artist, setArtist] = useState("SomaFM"), [error, setError] = useState(""), [analyser, setAnalyser] = useState<AnalyserNode | null>(null), [favorites, setFavorites] = useState<string[]>(() => {
         try {
-            return JSON.parse(localStorage.getItem("auditory-favorites") || "[]")
+            const stored: unknown = JSON.parse(localStorage.getItem("auditory-favorites") || "[]");
+            if (!Array.isArray(stored)) return [];
+            return stored.map(value => typeof value === "string" ? value : value && typeof value === "object" ? String((value as { id?: unknown; title?: unknown }).id ?? (value as { title?: unknown }).title ?? "") : "").filter(Boolean);
         } catch {
-            return []
+            return [];
         }
     });
     useEffect(() => {
