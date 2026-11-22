@@ -153,9 +153,6 @@ export function AuditoryLab({onBack}: { onBack: () => void }) {
         void play(s);
         setView("radio")
     };
-    const toggleFullscreen = () => {
-        if (!document.fullscreenElement) void document.documentElement.requestFullscreen?.(); else void document.exitFullscreen?.()
-    };
     return <div className="auditory-lab">
         <header className="auditory-topbar">
             <button className="auditory-back" onClick={onBack}><ArrowLeft size={16}/> <span>Sandbox</span></button>
