@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Activity, AudioLines, BrainCircuit, FlaskConical, GitBranch, Grid2X2, Orbit, Waves } from "lucide-react";
+import { Activity, AudioLines, BrainCircuit, FlaskConical, GitBranch, Grid2X2, Info, Orbit, Waves } from "lucide-react";
 import { VisualLab } from "./components/visual-lab/VisualLab";
 import { GamesLab } from "./components/games-lab/GamesLab";
 import { AuditoryLab, GlobalMiniPlayer } from "./components/auditory-lab/AuditoryLab";
 import { AudioProvider } from "./components/auditory-lab/AudioProvider";
+import { AboutPage } from "./components/AboutPage";
 
 const labs = [
   { id: "01", title: "Visual Lab", description: "Explore mathematical surfaces, 3D scenes and interactive graphics.", icon: Orbit, path: "/visual-lab" },
@@ -36,6 +37,7 @@ function AppContent() {
   if (path === "/games-lab") return <GamesLab onBack={() => navigate("/")} />;
   if (path === "/visual-lab") return <VisualLab onBack={() => navigate("/")} />;
   if (path === "/auditory-lab") return <AuditoryLab onBack={() => navigate("/")} />;
+  if (path === "/about") return <AboutPage onBack={() => navigate("/")} />;
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -43,6 +45,7 @@ function AppContent() {
         <div className="sidebar-section">
           <p className="eyebrow">WORKSPACE</p>
           <a className="nav-item active" href="/" onClick={e => { e.preventDefault(); navigate("/"); }}><Grid2X2 size={16} /> Overview</a>
+          <a className="nav-item" href="/about" onClick={e => { e.preventDefault(); navigate("/about"); }}><Info size={16} /> About</a>
           <a className="nav-item" href="/" onClick={e => { e.preventDefault(); navigate("/"); document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth" }); }}><GitBranch size={16} /> Roadmap</a>
         </div>
         <div className="sidebar-section">
