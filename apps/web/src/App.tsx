@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, AudioLines, BrainCircuit, FlaskConical, GitBranch, Grid2X2, Info, Orbit, Waves } from "lucide-react";
+import { Activity, AudioLines, BrainCircuit, FlaskConical, Grid2X2, Info, Orbit, PanelLeftClose, PanelLeftOpen, Waves } from "lucide-react";
 import { VisualLab } from "./components/visual-lab/VisualLab";
 import { GamesLab } from "./components/games-lab/GamesLab";
 import { AuditoryLab, GlobalMiniPlayer } from "./components/auditory-lab/AuditoryLab";
@@ -29,6 +29,7 @@ export function navigate(path: string) {
 }
 function AppContent() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, "") || "/");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   useEffect(() => {
     const updateRoute = () => setPath(window.location.pathname.replace(/\/$/, "") || "/");
     window.addEventListener("popstate", updateRoute);
@@ -39,23 +40,37 @@ function AppContent() {
   if (path === "/auditory-lab") return <AuditoryLab onBack={() => navigate("/")} />;
   if (path === "/about") return <AboutPage onBack={() => navigate("/")} />;
   return (
-    <div className="app-shell">
+    <div className={`app-shell${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
       <aside className="sidebar">
-        <a className="brand" href="/" onClick={e => { e.preventDefault(); navigate("/"); }}><img src="/open-frame.svg" alt="Sandbox" className="h-10 w-10" /><span className="brand-name">SANDBOX</span></a>
+        <div className="sidebar-brand-row">
+          <a className="brand" href="/" onClick={e => { e.preventDefault(); navigate("/"); }} aria-label="Sandbox overview">
+            <img src="/open-frame.svg" alt="" className="h-10 w-10" />
+            <span className="brand-name">SANDBOX</span>
+          </a>
+          <button
+            className="sidebar-toggle"
+            type="button"
+            onClick={() => setSidebarCollapsed(value => !value)}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-expanded={!sidebarCollapsed}
+            title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+        </div>
         <div className="sidebar-section">
           <p className="eyebrow">WORKSPACE</p>
-          <a className="nav-item active" href="/" onClick={e => { e.preventDefault(); navigate("/"); }}><Grid2X2 size={16} /> Overview</a>
-          <a className="nav-item" href="/about" onClick={e => { e.preventDefault(); navigate("/about"); }}><Info size={16} /> About</a>
-          <a className="nav-item" href="/" onClick={e => { e.preventDefault(); navigate("/"); document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth" }); }}><GitBranch size={16} /> Roadmap</a>
+          <a className="nav-item active" href="/" title="Overview" onClick={e => { e.preventDefault(); navigate("/"); }}><Grid2X2 size={16} /><span>Overview</span></a>
+          <a className="nav-item" href="/about" title="About" onClick={e => { e.preventDefault(); navigate("/about"); }}><Info size={16} /><span>About</span></a>
         </div>
         <div className="sidebar-section">
           <p className="eyebrow">LABS</p>
-          <a className="nav-item" href="/visual-lab" onClick={e => { e.preventDefault(); navigate("/visual-lab"); }}><Orbit size={16} /> Visual Lab</a>
-          <a className="nav-item muted" href="/data-lab"><Grid2X2 size={16} /> Data Lab</a>
-          <a className="nav-item muted" href="/event-lab"><Waves size={16} /> Event Lab</a>
-          <a className="nav-item muted" href="/ai-lab"><FlaskConical size={16} /> AI Lab</a>
-          <a className="nav-item" href="/games-lab" onClick={e => { e.preventDefault(); navigate("/games-lab"); }}><BrainCircuit size={16} /> Games Lab</a>
-          <a className="nav-item" href="/auditory-lab" onClick={e => { e.preventDefault(); navigate("/auditory-lab"); }}><AudioLines size={16} /> Auditory Lab</a>
+          <a className="nav-item" href="/visual-lab" title="Visual Lab" onClick={e => { e.preventDefault(); navigate("/visual-lab"); }}><Orbit size={16} /><span>Visual Lab</span></a>
+          <a className="nav-item muted" href="/data-lab" title="Data Lab"><Grid2X2 size={16} /><span>Data Lab</span></a>
+          <a className="nav-item muted" href="/event-lab" title="Event Lab"><Waves size={16} /><span>Event Lab</span></a>
+          <a className="nav-item muted" href="/ai-lab" title="AI Lab"><FlaskConical size={16} /><span>AI Lab</span></a>
+          <a className="nav-item" href="/games-lab" title="Games Lab" onClick={e => { e.preventDefault(); navigate("/games-lab"); }}><BrainCircuit size={16} /><span>Games Lab</span></a>
+          <a className="nav-item" href="/auditory-lab" title="Auditory Lab" onClick={e => { e.preventDefault(); navigate("/auditory-lab"); }}><AudioLines size={16} /><span>Auditory Lab</span></a>
         </div>
       </aside>
       <main className="main-content" id="overview">
