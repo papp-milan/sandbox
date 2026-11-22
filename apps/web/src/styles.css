@@ -1827,3 +1827,71 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     padding-top: 0;
   }
 }
+
+
+/* About page: documented interface palette */
+.about-palette {
+  padding: 42px 0;
+  border-top: 1px solid var(--line);
+}
+.about-palette-heading {
+  margin-bottom: 22px;
+}
+.about-palette-heading h2 {
+  margin: 5px 0 8px;
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -.04em;
+  font-weight: 500;
+}
+.about-palette-heading > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.about-palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 12px;
+}
+.about-color {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: #111;
+}
+.about-color-swatch {
+  flex: 0 0 76px;
+  min-height: 96px;
+  border-right: 1px solid #ffffff12;
+}
+.about-color-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+}
+.about-color-details strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+.about-color-details code {
+  color: #e87535;
+  font: 12px var(--mono);
+}
+.about-color-details small {
+  color: #888;
+  font-size: 11px;
+  line-height: 1.4;
+}
+@media (max-width: 650px) {
+  .about-palette { padding: 30px 0; }
+  .about-palette-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .about-color-swatch { flex-basis: 48px; min-height: 90px; }
+  .about-color-details { padding: 9px; }
+  .about-color-details strong { font-size: 12px; }
+  .about-color-details small { font-size: 10px; }
+}
