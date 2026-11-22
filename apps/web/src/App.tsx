@@ -43,7 +43,7 @@ function AppContent() {
         <div className="sidebar-section">
           <p className="eyebrow">WORKSPACE</p>
           <a className="nav-item active" href="/" onClick={e => { e.preventDefault(); navigate("/"); }}><Grid2X2 size={16} /> Overview</a>
-          <a className="nav-item" href="/#roadmap" onClick={e => { e.preventDefault(); navigate("/"); document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth" }); }}><GitBranch size={16} /> Roadmap</a>
+          <a className="nav-item" href="/" onClick={e => { e.preventDefault(); navigate("/"); document.getElementById("roadmap")?.scrollIntoView({ behavior: "smooth" }); }}><GitBranch size={16} /> Roadmap</a>
         </div>
         <div className="sidebar-section">
           <p className="eyebrow">LABS</p>
@@ -61,7 +61,7 @@ function AppContent() {
           <div className="section-heading"><h2>Explore the labs</h2></div>
           <div className="lab-grid">
             {labs.map(({ id, title, description, icon: Icon, path: target }) => (
-              <a className="lab-card" key={id} href={target || "#"} aria-disabled={!target} onClick={target ? e => { e.preventDefault(); navigate(target); } : e => e.preventDefault()}>
+              <a className="lab-card" key={id} href={target || "/"} aria-disabled={!target} onClick={target ? e => { e.preventDefault(); navigate(target); } : e => e.preventDefault()}>
                 <div className="lab-card-heading"><h3>{title}</h3><Icon size={19} strokeWidth={1.5} /></div>
                 <p>{description}</p>
                 <div className="lab-card-footer"><span className="arrow">{target ? "↗" : "—"}</span></div>
