@@ -1829,6 +1829,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 
+/* Give the compact sidebar logo room before the first navigation item. */
+.app-shell.sidebar-collapsed .sidebar-brand-row {
+  margin-bottom: 28px;
+}
+@media (max-width: 650px) {
+  .app-shell.sidebar-collapsed .sidebar-brand-row {
+    margin-bottom: 0;
+  }
+}
+
 /* About page: documented interface palette */
 .about-palette {
   padding: 42px 0;
