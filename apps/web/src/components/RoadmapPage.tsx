@@ -1,5 +1,4 @@
 import { ArrowLeft, Check, Circle, Compass, FlaskConical, Layers3 } from "lucide-react";
-import { navigate } from "../App";
 
 const platformItems = [
   { title: "Repository and application structure", done: true },
@@ -79,7 +78,7 @@ export function RoadmapPage({ onBack }: { onBack: () => void }) {
         <div className="roadmap-principle-list">{principles.map((principle, index) => <div className="roadmap-principle" key={principle}><span>{String(index + 1).padStart(2, "0")}</span><p>{principle}</p></div>)}</div>
       </section>
 
-      <footer className="roadmap-footer"><span>ROADMAP / LIVING DOCUMENT</span><button onClick={() => navigate("/")}><ArrowLeft size={13} /> BACK TO OVERVIEW</button></footer>
+      <footer className="roadmap-footer"><span>ROADMAP / LIVING DOCUMENT</span><button onClick={onBack}><ArrowLeft size={13} /> BACK TO OVERVIEW</button></footer>
     </main>
   );
 }
